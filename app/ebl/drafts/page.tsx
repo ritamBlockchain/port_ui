@@ -44,12 +44,13 @@ export default function DraftList() {
         </div>
       ) : drafts && drafts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {drafts.map((draft: any) => {
+          {/* Deduplicate records to prevent React key errors during ledger synchronization */}
+          {Array.from(new Map(drafts.map((d: any) => [d.draftId, d])).values()).map((draft: any, index) => {
             const status = statusMap[draft.status as keyof typeof statusMap] || statusMap.draft;
             const StatusIcon = status.icon;
             
             return (
-              <div key={draft.draftId} className="port-card group hover:shadow-xl transition-all animate-in zoom-in-95 duration-300 overflow-hidden border-t-4 border-t-portaccent">
+              <div key={`${draft.draftId}-${index}`} className="port-card group hover:shadow-xl transition-all animate-in zoom-in-95 duration-300 overflow-hidden border-t-4 border-t-portaccent">
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
                      <div>

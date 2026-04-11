@@ -7,8 +7,8 @@ export async function GET(req: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-      // Restore listing logic
-      const result = await evaluateTransaction('QueryAssets', '{"selector":{"docType":"prearrival"}}');
+      // Use prefix-based range query for high compatibility (fixes "approved not showing" issue)
+      const result = await evaluateTransaction('QueryAssets', 'prefix:prearrival:');
       const rawRecords = JSON.parse(result.toString());
       const data = rawRecords.map((r: string) => JSON.parse(r));
       return NextResponse.json({ success: true, data });
@@ -33,7 +33,19 @@ export async function GET(req: NextRequest) {
       }
     } catch (privErr: any) {
       console.log('Private data fetch (non-critical):', privErr.message);
-      // Private data is optional; don't fail the main request
+    }
+
+    // 3. Fetch Berth Assignment (Operational Join)
+    try {
+      const berthResult = await evaluateTransaction('QueryAssets', `{"selector":{"submissionId":"${id}"}}`);
+      const berthArray = JSON.parse(berthResult.toString());
+      // Filter for the actual berth assignment object among potentially other assets sharing this sub ID
+      const berthRecord = berthArray.map((r: string) => JSON.parse(r)).find((asset: any) => asset.assignmentId);
+      if (berthRecord) {
+        data.berthAssignment = berthRecord;
+      }
+    } catch (berthErr: any) {
+      console.log('Berth fetch (non-critical):', berthErr.message);
     }
 
     return NextResponse.json({ success: true, data });

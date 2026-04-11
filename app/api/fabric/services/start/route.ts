@@ -26,17 +26,21 @@ export async function POST(req: NextRequest) {
         const berthsResult = await evaluateTransaction('QueryAssets', `{"selector":{"submissionId":"${submissionId}"}}`);
         const berths = JSON.parse(berthsResult.toString());
         if (berths && berths.length > 0) {
-          const berth = berths.find((b: any) => b.assignmentId);
-          if (berth) assignmentId = berth.assignmentId;
+          const berthRecord = berths.map((r: string) => JSON.parse(r)).find((b: any) => b.assignmentId);
+          if (berthRecord) assignmentId = berthRecord.assignmentId;
         }
       } catch (e) {
         console.warn('Could not auto-fetch assignmentId for service:', e);
       }
     }
 
-    // If still no assignmentId, we might fail or use a placeholder if the contract allows
-    // But for maritime workflow, assignment is usually required.
-    const finalAssignmentId = assignmentId || 'AUTO_BERTH';
+    // If still no assignmentId, we cannot start the service as the contract expects a valid ID
+    if (!assignmentId) {
+       return NextResponse.json({ 
+         success: false, 
+         error: `No berth assignment found for submission ${submissionId}. Please assign a berth first.` 
+       }, { status: 400 });
+    }
 
     console.log(`[API] Starting Service ${serviceType} for ${submissionId} (Log: ${logId})`);
 
@@ -45,7 +49,7 @@ export async function POST(req: NextRequest) {
       logId.toString(),
       requestId.toString(),
       submissionId.toString(),
-      finalAssignmentId.toString(),
+      assignmentId.toString(),
       serviceType.toString(),
       (providerName || 'PROVIDER').toString(),
       quantityUnit.toString()

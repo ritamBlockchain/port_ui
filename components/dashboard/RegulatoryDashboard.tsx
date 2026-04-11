@@ -1,6 +1,6 @@
 'use client';
 
-import { FaGavel, FaIdCard, FaHospital, FaCheckCircle, FaExclamationCircle, FaArrowRight, FaClock, FaShieldAlt } from 'react-icons/fa';
+import { FaGavel, FaIdCard, FaHospital, FaCheckCircle, FaExclamationCircle, FaArrowRight, FaClock, FaShieldAlt, FaShip } from 'react-icons/fa';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/api/auth';

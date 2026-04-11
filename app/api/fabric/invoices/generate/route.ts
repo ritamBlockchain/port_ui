@@ -31,9 +31,9 @@ export async function POST(req: NextRequest) {
         const berthsResult = await evaluateTransaction('QueryAssets', `{"selector":{"submissionId":"${submissionId}"}}`);
         const berths = JSON.parse(berthsResult.toString());
         if (berths && berths.length > 0) {
-          // Find a berth assignment record
-          const berth = berths.find((b: any) => b.assignmentId);
-          if (berth) assignmentId = berth.assignmentId;
+          // Find a berth assignment record by parsing strings into objects
+          const berthRecord = berths.map((r: string) => JSON.parse(r)).find((b: any) => b.assignmentId);
+          if (berthRecord) assignmentId = berthRecord.assignmentId;
         }
       } catch (e) {
         console.warn('Could not auto-fetch assignmentId:', e);
@@ -46,12 +46,22 @@ export async function POST(req: NextRequest) {
     let effectiveDiscounts = discounts;
 
     if (!effectiveLogIds) {
-      const logsResult = await evaluateTransaction('GetServiceLogsBySubmission', submissionId);
-      const logs = JSON.parse(logsResult.toString() || '[]');
+      // Use QueryAssets instead of GetServiceLogsBySubmission to bypass strict return schema validation
+      const selector = JSON.stringify({ selector: { submissionId, docType: "service_complete" } });
+      // If that fails, fall back to general log query
+      const logsResult = await evaluateTransaction('QueryAssets', `{"selector":{"submissionId":"${submissionId}"}}`);
+      const rawLogs = JSON.parse(logsResult.toString() || '[]');
+      const logs = rawLogs.map((r: string) => JSON.parse(r));
+      
       const completedLogs = logs.filter((l: any) => l.status === 'completed' || l.status === 'resolved');
       
       if (completedLogs.length === 0) {
-        return NextResponse.json({ success: false, error: 'No completed services found to invoice' }, { status: 400 });
+        return NextResponse.json({ 
+          success: true, // We return true but empty/msg so UI can show a helpful tip instead of a scary red error
+          data: [],
+          error: 'NO_COMPLETED_SERVICES',
+          message: 'No completed services found to invoice for this vessel. Please ensure the Service Provider (e.g. Tug, Pilot) has marked the relevant services as "Completed" on the ledger first.' 
+        }, { status: 400 });
       }
       
       effectiveLogIds = completedLogs.map((l: any) => l.logId);

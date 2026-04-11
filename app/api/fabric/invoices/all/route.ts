@@ -3,8 +3,8 @@ import { evaluateTransaction } from '@/lib/fabric/connection';
 
 export async function GET() {
   try {
-    // Correctly using QueryAssets to fetch all invoices
-    const result = await evaluateTransaction('QueryAssets', '{"selector":{"invoiceId":{"$gt":null}}}');
+    // Standardize on prefix-based queries for consistency and to avoid cross-asset field name collisions
+    const result = await evaluateTransaction('QueryAssets', 'prefix:invoice:');
     const rawData = JSON.parse(result.toString());
     const data = rawData.map((item: string) => JSON.parse(item));
     

@@ -87,8 +87,9 @@ export default function InvoicesPage() {
         </div>
       ) : invoices && invoices.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
-          {invoices.map((inv) => (
-            <div key={inv.invoiceId} className="port-card p-6 flex flex-col md:flex-row md:items-center justify-between group hover:border-portaccent transition-all bg-white relative overflow-hidden">
+          {/* Deduplicate records to prevent React key errors during ledger sync */}
+          {Array.from(new Map(invoices.map(inv => [inv.invoiceId, inv])).values()).map((inv, index) => (
+            <div key={`${inv.invoiceId}-${index}`} className="port-card p-6 flex flex-col md:flex-row md:items-center justify-between group hover:border-portaccent transition-all bg-white relative overflow-hidden">
                 {inv.status === 'paid' && (
                     <div className="absolute top-0 right-0 w-24 h-24 flex items-center justify-center rotate-45 translate-x-10 -translate-y-10 bg-emerald-500/10">
                         <FaCheckCircle className="text-emerald-500 text-2xl -rotate-45" />

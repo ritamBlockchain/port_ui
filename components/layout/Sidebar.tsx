@@ -27,7 +27,7 @@ const phases = [
     title: 'Phase 3: Berthing & Services',
     items: [
       { href: '/services', label: 'Port Services', icon: FaAnchor, roles: ['admin', 'portauthority', 'serviceprovider', 'carrier'] },
-      { href: '/pre-arrival', label: 'Assign Berth', icon: FaBuilding, roles: ['portauthority', 'admin'] },
+      { href: '/berth', label: 'Assign Berth', icon: FaBuilding, roles: ['portauthority', 'admin'] },
     ]
   },
   {

@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { usePreArrival } from '@/hooks/usePreArrival';
 import { useAuth } from '@/lib/api/auth';
-import { FaArrowLeft, FaShip, FaUserCircle, FaBox, FaHistory, FaCheckCircle, FaExclamationTriangle, FaShieldAlt } from 'react-icons/fa';
+import { FaArrowLeft, FaShip, FaUserCircle, FaBox, FaHistory, FaCheckCircle, FaExclamationTriangle, FaShieldAlt, FaAnchor } from 'react-icons/fa';
 import Link from 'next/link';
 import HashDisplay from '@/components/shared/HashDisplay';
 import ApprovalPanel from '@/components/pre-arrival/ApprovalPanel';
@@ -12,7 +12,7 @@ export default function PreArrivalDetailPage() {
   const { submissionId } = useParams();
   const router = useRouter();
   const { role } = useAuth();
-  const { submission, isLoading, error } = usePreArrival(submissionId as string);
+  const { submission, isLoading, error, validateCompliance } = usePreArrival(submissionId as string);
 
   if (isLoading) return (
     <div className="py-20 flex flex-col items-center gap-4 text-portaccent animate-pulse">
@@ -61,6 +61,36 @@ export default function PreArrivalDetailPage() {
           </div>
         </div>
       </div>
+
+      {submission.berthAssignment && (
+        <div className="port-card p-4 bg-indigo-900 text-white flex flex-col md:flex-row justify-between items-center gap-4 animate-in slide-in-from-top duration-500 shadow-xl overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-full bg-white/5 skew-x-12 translate-x-16" />
+            <div className="flex items-center gap-4 z-10">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">
+                    <FaAnchor />
+                </div>
+                <div>
+                    <h3 className="font-display text-lg leading-tight">Berth Allocated</h3>
+                    <p className="text-[10px] text-indigo-200 font-bold uppercase tracking-widest">{submission.berthAssignment.berthName || 'Official Quay'}</p>
+                </div>
+            </div>
+            
+            <div className="flex gap-8 z-10">
+                <div className="text-center border-l border-white/20 pl-6">
+                    <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest mb-1">Berth ID</p>
+                    <p className="font-mono font-bold">{submission.berthAssignment.berthId}</p>
+                </div>
+                <div className="text-center border-l border-white/20 pl-6">
+                    <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest mb-1">Time Slot</p>
+                    <p className="font-bold">{submission.berthAssignment.timeSlot || 'TBD'}</p>
+                </div>
+                <div className="text-center border-l border-white/20 pl-6">
+                    <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-widest mb-1">Assignment ID</p>
+                    <p className="font-mono text-[10px] opacity-70">{submission.berthAssignment.assignmentId}</p>
+                </div>
+            </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
@@ -155,6 +185,24 @@ export default function PreArrivalDetailPage() {
 
         {/* Audit & Approvals (Sidebar) */}
         <div className="space-y-8">
+            {submission.status === 'pending' && (
+               <button 
+                onClick={() => validateCompliance.mutate()}
+                disabled={validateCompliance.isPending}
+                className="w-full port-card p-4 bg-indigo-50 border-2 border-indigo-200 text-indigo-700 flex items-center justify-center gap-3 hover:bg-indigo-100 transition-all font-display shadow-lg shadow-indigo-100/50 group"
+              >
+                <FaShieldAlt className={`group-hover:rotate-12 transition-transform ${validateCompliance.isPending ? 'animate-spin' : ''}`} />
+                {validateCompliance.isPending ? 'Verifying Cargo Manifest...' : 'Trigger Compliance Check'}
+              </button>
+            )}
+            {submission.status === 'approved' && ['admin', 'portauthority'].includes(role) && (
+              <Link 
+                href="/berth" 
+                className="port-card p-4 bg-indigo-600 text-white flex items-center justify-center gap-3 hover:bg-indigo-700 transition-all font-display shadow-lg shadow-indigo-100"
+              >
+                <FaAnchor /> Assign Berth Portfolio
+              </Link>
+            )}
             <ApprovalPanel submissionId={submission.submissionId} approvals={submission.approvals} currentStatus={submission.status} />
 
             <section className="port-card p-6 space-y-4">

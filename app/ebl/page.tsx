@@ -49,8 +49,9 @@ export default function EBLPage() {
         </div>
       ) : ebls && ebls.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
-          {ebls.map((ebl) => (
-            <div key={ebl.eblId} className="port-card group hover:shadow-lg transition-all border-l-4 border-l-portaccent animate-in slide-in-from-right duration-300 font-sans">
+          {/* Deduplicate records to prevent React key errors during ledger synchronization */}
+          {Array.from(new Map(ebls.map(ebl => [ebl.eblId, ebl])).values()).map((ebl, index) => (
+            <div key={`${ebl.eblId}-${index}`} className="port-card group hover:shadow-lg transition-all border-l-4 border-l-portaccent animate-in slide-in-from-right duration-300 font-sans">
               <div className="p-6">
                 <div className="flex flex-col md:flex-row justify-between gap-6">
                   <div className="flex gap-4">

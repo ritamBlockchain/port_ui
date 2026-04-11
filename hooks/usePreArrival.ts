@@ -68,6 +68,28 @@ export function usePreArrival(submissionId?: string) {
     },
   });
 
+  // Validate Compliance
+  const validateComplianceMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch('/api/fabric/pre-arrival/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ submissionId }),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error);
+      return json;
+    },
+    onSuccess: () => {
+      toast.success('Automated compliance check completed on ledger');
+      queryClient.invalidateQueries({ queryKey: ['pre-arrival'] });
+      queryClient.invalidateQueries({ queryKey: ['pre-arrival-list'] });
+    },
+    onError: (err: any) => {
+      toast.error(`Validation failed: ${err.message}`);
+    },
+  });
+
   return {
     submission,
     isLoading,
@@ -77,6 +99,7 @@ export function usePreArrival(submissionId?: string) {
     isSubmitting: submitMutation.isPending,
     approve: approveMutation.mutate,
     isApproving: approveMutation.isPending,
+    validateCompliance: validateComplianceMutation,
   };
 }
 

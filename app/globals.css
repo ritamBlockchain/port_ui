@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+@theme {
+  --color-base: #F7FBFC;
+  --color-surface: #D6E6F2;
+  --color-mid: #B9D7EA;
+  --color-accent: #769FCD;
+
+  --color-background: var(--color-base);
+  --color-foreground: #1a2f45;
+  
+  --color-portbase: #F7FBFC;
+  --color-portsurface: #D6E6F2;
+  --color-portmid: #B9D7EA;
+  --color-portaccent: #769FCD;
+
+  --color-success: #4caf8f;
+  --color-warning: #e8a838;
+  --color-danger: #d64545;
+  --color-info: #769FCD;
+
+  --color-text-primary: #1a2f45;
+  --color-text-secondary: #4a6b8a;
+  --color-text-muted: #7a9bb5;
+
+  --font-display: 'DM Serif Display', serif;
+  --font-sans: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    @apply font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--color-portaccent);
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .port-card {
+    background-color: var(--color-portsurface);
+    border: 1px solid var(--color-portmid);
+    @apply rounded-xl shadow-sm overflow-hidden;
+  }
+
+  .port-btn-primary {
+    background-color: var(--color-portaccent);
+    @apply text-white px-4 py-2 rounded-lg hover:bg-[#5a87b8] transition-colors duration-150 font-medium;
+  }
+
+  .port-input {
+    background-color: var(--color-portbase);
+    border: 1px solid var(--color-portmid);
+    @apply rounded-lg px-3 py-2 focus:ring-2 focus:ring-portaccent focus:outline-none transition-all;
+  }
+}

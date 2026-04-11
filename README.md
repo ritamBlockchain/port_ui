@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PortChain UI Integration Guide
 
-## Getting Started
+This frontend is configured to connect to your local Hyperledger Fabric network as specified in your Master Prompt.
 
-First, run the development server:
+## 🚀 Setup Instructions
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### 1. Configure Environment
+Update the following paths in `.env.local` to match your local Fabric organization structure:
+
+```env
+ADMIN_CERT_PATH=/path/to/your/org1/msp/signcerts/cert.pem
+ADMIN_KEY_PATH=/path/to/your/org1/msp/keystore/priv_key
+CONNECTION_PROFILE_PATH=/path/to/your/connection-org1.json
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install Native Dependencies
+Since `fabric-network` has native components, ensures you have the necessary build tools:
+- Node.js 18+
+- Python 3.x
+- C++ Build Tools (Xcode Command Line Tools on Mac)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Run Development Server
+```bash
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🧪 Testing All Roles
+We have implemented a **Role Switcher** in the sidebar. 
+1. Open the sidebar.
+2. Select a role (e.g., Shipping Agent, Customs, Bank).
+3. The UI will dynamically:
+   - Filter menu items based on permissions.
+   - Show/Hide action buttons (e.g., only Customs can Approve Pre-Arrivals).
+   - Simulate identity-based dashboard data.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🏗️ Architecture
+- **Framework**: Next.js 14 (App Router)
+- **Styling**: Tailwind CSS (Maritime Theme)
+- **Blockchain**: Hyperledger Fabric SDK v2.2
+- **Audit**: Merkle Tree settlement visualization
+- **Security**: RBAC with Private Data Collection indicators

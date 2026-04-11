@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ["fabric-network", "fabric-ca-client", "fabric-common", "fabric-protos"],
 };
 
 export default nextConfig;

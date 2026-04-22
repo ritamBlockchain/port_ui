@@ -65,7 +65,10 @@ export default function InvoicesPage() {
                 onChange={(e) => setSelectedSubmission(e.target.value)}
               >
                 <option value="">-- Select Vessel with Completed Services --</option>
-                {submissions?.filter(s => s.status === 'approved').map(s => (
+                {submissions?.filter(s => {
+                  const st = (s.status || '').toLowerCase();
+                  return st === 'approved' || st === 'compliant';
+                }).map(s => (
                   <option key={s.submissionId} value={s.submissionId}>{s.vesselName} ({s.submissionId})</option>
                 ))}
               </select>

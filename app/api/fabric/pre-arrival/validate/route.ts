@@ -1,4 +1,4 @@
-import { submitTransaction } from '@/lib/fabric/connection';
+import { submitTransactionWithTxId, evaluateTransaction } from '@/lib/fabric/connection';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
@@ -12,11 +12,21 @@ export async function POST(req: NextRequest) {
     console.log(`[Fabric] Calling ValidateCompliance for ${submissionId}`);
     
     // Contract: ValidateCompliance(ctx, submissionId)
-    const result = await submitTransaction('ValidateCompliance', submissionId.toString());
+    const { txId } = await submitTransactionWithTxId('ValidateCompliance', submissionId.toString());
+
+    // Re-fetch the updated submission to return current state
+    let updatedSubmission = null;
+    try {
+      const getResult = await evaluateTransaction('GetPreArrival', submissionId);
+      updatedSubmission = JSON.parse(getResult.toString());
+    } catch (e) {
+      console.warn('Could not re-fetch submission after validation:', e);
+    }
 
     return NextResponse.json({
       success: true,
-      txId: result.toString(),
+      txId,
+      data: updatedSubmission,
       message: 'Automated compliance validation triggered and recorded on ledger'
     });
   } catch (error: any) {

@@ -73,7 +73,7 @@ export default function DraftList() {
                     </div>
                     <div className="flex justify-between items-center text-xs">
                         <span className="text-color-text-muted font-bold uppercase tracking-tighter">Drafted By</span>
-                        <span className="text-indigo-600 font-medium">@{draft.createdBy.split('@')[0]}</span>
+                        <span className="text-indigo-600 font-medium">@{(draft.createdBy || 'unknown').split('@')[0]}</span>
                     </div>
                   </div>
 

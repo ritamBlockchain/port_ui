@@ -13,7 +13,7 @@ export default function ApprovalPanel({ submissionId }: { submissionId: string }
   const [comments, setComments] = useState('');
   const { approve, isApproving } = usePreArrival(submissionId);
 
-  const agencyRoles: Role[] = ['customs', 'portauthority', 'immigration', 'portHealth'];
+  const agencyRoles: Role[] = ['customs', 'portauthority', 'immigration', 'portHealth', 'admin'];
   const canApprove = agencyRoles.includes(role);
 
   const handleAction = async (approved: boolean) => {

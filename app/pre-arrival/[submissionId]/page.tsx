@@ -40,7 +40,10 @@ export default function PreArrivalDetailPage() {
           <div className="flex items-center gap-4">
             <h1 className="text-4xl font-display text-color-text-primary">Submission Review</h1>
             <span className={`px-4 py-1 rounded-full text-xs font-bold border uppercase tracking-widest ${
-              submission.status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200'
+              submission.status?.toLowerCase() === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 
+              submission.status?.toLowerCase() === 'compliant' ? 'bg-indigo-50 text-indigo-600 border-indigo-200' :
+              ['pending', 'submitted'].includes(submission.status?.toLowerCase() || '') ? 'bg-amber-50 text-amber-600 border-amber-200' :
+              'bg-amber-50 text-amber-600 border-amber-200'
             }`}>
               {submission.status}
             </span>
@@ -185,17 +188,24 @@ export default function PreArrivalDetailPage() {
 
         {/* Audit & Approvals (Sidebar) */}
         <div className="space-y-8">
-            {(submission.status === 'pending' || submission.status === 'compliant') && (
+            {['pending', 'submitted'].includes(submission.status?.toLowerCase() || '') && (
                <button 
-                onClick={() => validateCompliance.mutate()}
-                disabled={validateCompliance.isPending}
-                className="w-full port-card p-4 bg-indigo-50 border-2 border-indigo-200 text-indigo-700 flex items-center justify-center gap-3 hover:bg-indigo-100 transition-all font-display shadow-lg shadow-indigo-100/50 group"
+                 onClick={() => validateCompliance.mutate()}
+                 disabled={validateCompliance.isPending}
+                 className="w-full port-card p-4 bg-indigo-50 border-2 border-indigo-200 text-indigo-700 flex items-center justify-center gap-3 hover:bg-indigo-100 transition-all font-display shadow-lg shadow-indigo-100/50 group"
               >
                 <FaShieldAlt className={`group-hover:rotate-12 transition-transform ${validateCompliance.isPending ? 'animate-spin' : ''}`} />
                 {validateCompliance.isPending ? 'Verifying Cargo Manifest...' : 'Trigger Compliance Check'}
               </button>
             )}
-            {submission.status === 'approved' && ['admin', 'portauthority'].includes(role) && (
+
+            {submission.status?.toLowerCase() === 'compliant' && (
+               <div className="w-full port-card p-4 bg-emerald-50 border-2 border-emerald-200 text-emerald-700 flex items-center justify-center gap-3 font-display shadow-lg shadow-emerald-100/50 animate-in zoom-in-95 duration-300">
+                  <FaCheckCircle className="text-emerald-500" />
+                  Compliance Verified
+               </div>
+            )}
+            {submission.status?.toLowerCase() === 'approved' && ['admin', 'portauthority'].includes(role) && (
               <Link 
                 href="/berth" 
                 className="port-card p-4 bg-indigo-600 text-white flex items-center justify-center gap-3 hover:bg-indigo-700 transition-all font-display shadow-lg shadow-indigo-100"
@@ -203,7 +213,9 @@ export default function PreArrivalDetailPage() {
                 <FaAnchor /> Assign Berth Portfolio
               </Link>
             )}
-            <ApprovalPanel submissionId={submission.submissionId} />
+            {['compliant', 'pending', 'submitted'].includes(submission.status?.toLowerCase() || '') && (
+              <ApprovalPanel submissionId={submission.submissionId} />
+            )}
 
             <section className="port-card p-6 space-y-4">
                 <h3 className="font-display text-xl flex items-center gap-2 border-b border-portmid pb-2">

@@ -32,15 +32,13 @@ const phases = [
   {
     title: 'Phase 4: Port Services (Day of Arrival)',
     items: [
-      { href: '/services', label: 'Request Services', icon: FaAnchor, roles: ['admin', 'shippingagent', 'serviceprovider', 'carrier'] },
-      { href: '/services', label: 'Service Execution', icon: FaTools, roles: ['admin', 'serviceprovider', 'portauthority'] },
+      { href: '/services', label: 'Port Services', icon: FaAnchor, roles: ['admin', 'shippingagent', 'serviceprovider', 'carrier', 'portauthority'] },
     ]
   },
   {
     title: 'Phase 5: Invoicing & Settlement',
     items: [
-      { href: '/invoices', label: 'Generate Invoice', icon: FaFileInvoice, roles: ['admin', 'portauthority'] },
-      { href: '/invoices', label: 'Confirm Payment', icon: FaFileInvoice, roles: ['admin', 'shippingagent', 'carrier'] },
+      { href: '/invoices', label: 'Financial Settlement', icon: FaFileInvoice, roles: ['admin', 'portauthority', 'shippingagent', 'carrier'] },
     ]
   },
   {
@@ -53,8 +51,7 @@ const phases = [
   {
     title: 'Phase 7: Digital Credentials',
     items: [
-      { href: '/credentials', label: 'Issue Credentials', icon: FaCertificate, roles: ['admin', 'registrar', 'portauthority'] },
-      { href: '/credentials', label: 'Verify Credentials', icon: FaCertificate, roles: ['admin', 'verifier', 'carrier', 'customs', 'immigration', 'portHealth'] },
+      { href: '/credentials', label: 'Digital Credentials', icon: FaCertificate, roles: ['admin', 'registrar', 'portauthority', 'verifier', 'carrier', 'customs', 'immigration', 'portHealth'] },
     ]
   }
 ];
@@ -106,7 +103,7 @@ export default function Sidebar() {
                     const isActive = pathname === item.href;
                     return (
                       <Link
-                        key={item.href}
+                        key={`${idx}-${item.href}`}
                         href={item.href}
                         className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm transition-all ${
                           isActive 

@@ -142,7 +142,10 @@ export default function RegulatoryDashboard() {
                   </div>
                   <div className="text-center">
                     <p className="text-[10px] uppercase font-bold tracking-widest text-color-text-muted">Status</p>
-                    <span className="bg-amber-50 text-amber-600 px-2 py-1 rounded border border-amber-200 text-xs font-bold uppercase">{sub.status}</span>
+                    <span className={`px-2 py-1 rounded border text-xs font-bold uppercase ${
+                      sub.status === 'compliant' ? 'bg-indigo-50 text-indigo-600 border-indigo-200' : 
+                      'bg-amber-50 text-amber-600 border-amber-200'
+                    }`}>{sub.status}</span>
                   </div>
                 </div>
               </div>

@@ -52,6 +52,19 @@ export async function submitTransaction(
   return c.submitTransaction(funcName, ...args);
 }
 
+/** submitTransactionWithTxId uses createTransaction to capture the real Fabric txId */
+export async function submitTransactionWithTxId(
+  funcName: string,
+  ...args: string[]
+): Promise<{ result: Buffer; txId: string }> {
+  const c = await getContract();
+  console.log(`[Fabric] Submitting ${funcName} with ${args.length} args:`, args);
+  const tx = c.createTransaction(funcName);
+  const txId = tx.getTransactionId();
+  const result = await tx.submit(...args);
+  return { result, txId };
+}
+
 export async function disconnect(): Promise<void> {
   if (gateway) {
     gateway.disconnect();

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { submitTransaction } from '@/lib/fabric/connection';
+import { submitTransactionWithTxId } from '@/lib/fabric/connection';
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
       etaTimestamp, cargoManifest, crewList, portCallPurpose 
     } = body;
 
-    const result = await submitTransaction(
+    const { txId } = await submitTransactionWithTxId(
       'SubmitPreArrival',
       submissionId,
       vesselIMO,
@@ -24,8 +24,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ 
       success: true, 
-      data: result.toString(),
-      txId: 'Fabric-Tx-Signature' // In a real app we'd get the actual txId from the result or context
+      txId,
+      submissionId,
+      message: `Pre-arrival ${submissionId} submitted to ledger`
     });
   } catch (error: any) {
     console.error('Fabric POST error:', error);

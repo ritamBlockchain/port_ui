@@ -11,42 +11,50 @@ import RoleSwitcher from './RoleSwitcher';
 
 const phases = [
   {
-    title: 'Phase 1: Arrival & Compliance',
+    title: 'Phase 1: Pre-Arrival (2-7 Days)',
     items: [
-      { href: '/pre-arrival', label: 'Vessel Declarations', icon: FaShip, roles: ['admin', 'shippingagent', 'customs', 'portauthority', 'immigration', 'portHealth'] },
+      { href: '/pre-arrival', label: 'Pre-Arrival Notifications', icon: FaShip, roles: ['admin', 'shippingagent', 'customs', 'portauthority', 'immigration', 'portHealth'] },
       { href: '/pre-arrival/new', label: 'Submit Pre-Arrival', icon: FaShip, roles: ['shippingagent', 'admin'] },
     ]
   },
   {
-    title: 'Phase 2: Regulatory Clearance',
+    title: 'Phase 2: Agency Approval (1-3 Days)',
     items: [
-      { href: '/pre-arrival', label: 'Approve Submissions', icon: FaGavel, roles: ['customs', 'immigration', 'portHealth', 'admin'] },
+      { href: '/pre-arrival', label: 'Multi-Agency Review', icon: FaGavel, roles: ['customs', 'immigration', 'portHealth', 'admin'] },
     ]
   },
   {
-    title: 'Phase 3: Berthing & Services',
+    title: 'Phase 3: Berth Assignment',
     items: [
-      { href: '/services', label: 'Port Services', icon: FaAnchor, roles: ['admin', 'portauthority', 'serviceprovider', 'carrier'] },
       { href: '/berth', label: 'Assign Berth', icon: FaBuilding, roles: ['portauthority', 'admin'] },
     ]
   },
   {
-    title: 'Phase 4: Finance & Settlement',
+    title: 'Phase 4: Port Services (Day of Arrival)',
     items: [
-      { href: '/invoices', label: 'Invoices & Payments', icon: FaFileInvoice, roles: ['admin', 'portauthority', 'carrier', 'serviceprovider', 'shippingagent'] },
+      { href: '/services', label: 'Request Services', icon: FaAnchor, roles: ['admin', 'shippingagent', 'serviceprovider', 'carrier'] },
+      { href: '/services', label: 'Service Execution', icon: FaTools, roles: ['admin', 'serviceprovider', 'portauthority'] },
     ]
   },
   {
-    title: 'Phase 5: Cargo Title & e-BL',
+    title: 'Phase 5: Invoicing & Settlement',
     items: [
-      { href: '/ebl', label: 'e-Bill of Lading', icon: FaFileContract, roles: ['admin', 'carrier', 'shipper', 'consignee', 'banktrade'] },
+      { href: '/invoices', label: 'Generate Invoice', icon: FaFileInvoice, roles: ['admin', 'portauthority'] },
+      { href: '/invoices', label: 'Confirm Payment', icon: FaFileInvoice, roles: ['admin', 'shippingagent', 'carrier'] },
     ]
   },
   {
-    title: 'Phase 6: Audit & Credentials',
+    title: 'Phase 6: Electronic Bill of Lading',
     items: [
-      { href: '/credentials', label: 'Ship Credentials', icon: FaCertificate, roles: ['admin', 'registrar', 'verifier', 'carrier'] },
-      { href: '/merkle', label: 'Blockchain Audit', icon: FaSignature, roles: ['admin', 'verifier'] },
+      { href: '/ebl/drafts', label: 'Create Draft EBL', icon: FaFileContract, roles: ['admin', 'carrier', 'shipper'] },
+      { href: '/ebl', label: 'Issue & Transfer EBL', icon: FaFileContract, roles: ['admin', 'carrier', 'shipper', 'consignee', 'banktrade'] },
+    ]
+  },
+  {
+    title: 'Phase 7: Digital Credentials',
+    items: [
+      { href: '/credentials', label: 'Issue Credentials', icon: FaCertificate, roles: ['admin', 'registrar', 'portauthority'] },
+      { href: '/credentials', label: 'Verify Credentials', icon: FaCertificate, roles: ['admin', 'verifier', 'carrier', 'customs', 'immigration', 'portHealth'] },
     ]
   }
 ];

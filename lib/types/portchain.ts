@@ -45,6 +45,7 @@ export interface PreArrivalSubmission {
   crewList?: CrewMember[];
   submittedAt: string;
   submittedBy: string;
+  berthAssignment?: BerthAssignment;
 }
 
 export interface BerthAssignment {
@@ -55,6 +56,8 @@ export interface BerthAssignment {
   isOverride: boolean;
   assignedBy: string;
   assignedAt: string;
+  berthName?: string;
+  timeSlot?: string;
 }
 
 export interface PortServiceRequest {

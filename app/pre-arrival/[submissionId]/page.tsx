@@ -185,7 +185,7 @@ export default function PreArrivalDetailPage() {
 
         {/* Audit & Approvals (Sidebar) */}
         <div className="space-y-8">
-            {submission.status === 'pending' && (
+            {(submission.status === 'pending' || submission.status === 'compliant') && (
                <button 
                 onClick={() => validateCompliance.mutate()}
                 disabled={validateCompliance.isPending}
@@ -203,7 +203,7 @@ export default function PreArrivalDetailPage() {
                 <FaAnchor /> Assign Berth Portfolio
               </Link>
             )}
-            <ApprovalPanel submissionId={submission.submissionId} approvals={submission.approvals} currentStatus={submission.status} />
+            <ApprovalPanel submissionId={submission.submissionId} />
 
             <section className="port-card p-6 space-y-4">
                 <h3 className="font-display text-xl flex items-center gap-2 border-b border-portmid pb-2">

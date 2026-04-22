@@ -1,6 +1,6 @@
 'use client';
 
-import { FaAnchor, FaMapMarkedAlt, FaFileInvoice, FaShip, FaCheckCircle, FaExclamationTriangle, FaArrowRight } from 'react-icons/fa';
+import { FaAnchor, FaMapMarkedAlt, FaFileInvoice, FaShip, FaCheckCircle, FaArrowRight, FaClipboardCheck, FaCertificate, FaBuilding } from 'react-icons/fa';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 
@@ -37,8 +37,46 @@ export default function PortAuthorityDashboard() {
   const activeServices = serviceLogs?.filter((l: any) => l.status === 'started') || [];
   const paidInvoices = invoices?.filter((inv: any) => inv.status === 'paid') || [];
 
+  // Stakeholder Journey Steps
+  const journeySteps = [
+    { id: 1, title: 'Approve Submissions', description: 'Review & authorize entries', icon: FaClipboardCheck, status: 'active' },
+    { id: 2, title: 'Assign Berths', description: 'Optimize port capacity', icon: FaBuilding, status: 'pending' },
+    { id: 3, title: 'Generate Invoices', description: 'Aggregate service logs', icon: FaFileInvoice, status: 'pending' },
+    { id: 4, title: 'Issue Credentials', description: 'Verify & certify vessels', icon: FaCertificate, status: 'pending' }
+  ];
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Stakeholder Journey Banner */}
+      <div className="port-card p-6 bg-gradient-to-r from-[#1a2f45] to-[#2a4a6f] text-white rounded-2xl shadow-xl border border-white/10">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-xl font-display font-bold mb-1">Port Authority Journey</h3>
+            <p className="text-sm opacity-80">60% reduction in manual coordination through blockchain automation</p>
+          </div>
+          <div className="bg-portaccent/20 px-4 py-2 rounded-xl border border-portaccent/30">
+            <p className="text-2xl font-display font-bold text-portaccent">60%</p>
+            <p className="text-[10px] uppercase tracking-widest text-portaccent">Efficiency Gain</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          {journeySteps.map((step, idx) => {
+            const Icon = step.icon;
+            return (
+              <div key={step.id} className="flex-1 flex flex-col items-center text-center">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${step.status === 'active' ? 'bg-portaccent text-white' : 'bg-white/10 text-white/60'}`}>
+                  <Icon className="text-lg" />
+                </div>
+                <p className="text-xs font-bold uppercase tracking-wider">{step.title}</p>
+                <p className="text-[10px] opacity-60 mt-1">{step.description}</p>
+                {idx < journeySteps.length - 1 && <FaArrowRight className="text-white/20 text-xs mt-2" />}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="port-card p-6 bg-indigo-600 text-white shadow-xl shadow-indigo-600/20 flex flex-col justify-between">
            <div className="flex justify-between items-start">
@@ -75,12 +113,13 @@ export default function PortAuthorityDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Berth Management - Phase 3 */}
         <div className="port-card bg-white border border-portmid/50 overflow-hidden shadow-sm">
            <div className="p-6 border-b border-portmid/20 flex justify-between items-center">
               <h4 className="text-lg font-display flex items-center gap-2">
-                <FaAnchor className="text-indigo-600" /> Berth Management
+                <FaAnchor className="text-indigo-600" /> Phase 3: Berth Assignment
               </h4>
-              <Link href="/pre-arrival" className="text-xs font-bold text-portaccent uppercase hover:underline">View All</Link>
+              <Link href="/berth" className="text-xs font-bold text-portaccent uppercase hover:underline">Manage Berths</Link>
            </div>
            <div className="divide-y divide-portmid/10">
               {pendingBerth.length ? pendingBerth.map((v: any) => (
@@ -110,10 +149,11 @@ export default function PortAuthorityDashboard() {
            </div>
         </div>
 
+        {/* Financial Clearance - Phase 5 */}
         <div className="port-card bg-white border border-portmid/50 overflow-hidden shadow-sm">
            <div className="p-6 border-b border-portmid/20 flex justify-between items-center text-emerald-600">
               <h4 className="text-lg font-display flex items-center gap-2 uppercase">
-                <FaFileInvoice /> Financial Clearance
+                <FaFileInvoice /> Phase 5: Invoicing & Settlement
               </h4>
               <Link href="/invoices" className="text-xs font-bold text-emerald-600 uppercase hover:underline">Invoicing Board</Link>
            </div>

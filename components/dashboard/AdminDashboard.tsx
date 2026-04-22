@@ -2,9 +2,12 @@
 
 import { FaUserShield, FaCertificate, FaSignature, FaServer, FaCogs, FaCheckCircle, FaExclamationCircle, FaArrowRight } from 'react-icons/fa';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { FaSyncAlt } from 'react-icons/fa';
 
 export default function AdminDashboard() {
+  const queryClient = useQueryClient();
   const { data: credentials } = useQuery({
     queryKey: ['admin-credentials'],
     queryFn: async () => {
@@ -14,7 +17,7 @@ export default function AdminDashboard() {
     }
   });
 
-  const { data: merkleStats } = useQuery({
+  const { data: merkleStats, refetch: refetchUnanchored } = useQuery({
     queryKey: ['admin-merkle'],
     queryFn: async () => {
       const res = await fetch('/api/fabric/merkle/unanchored');
@@ -33,12 +36,31 @@ export default function AdminDashboard() {
     refetchInterval: 30000,
   });
 
-  const { data: allLeaves } = useQuery({
+  const { data: allLeaves, refetch: refetchAll } = useQuery({
     queryKey: ['admin-merkle-all'],
     queryFn: async () => {
       const res = await fetch('/api/fabric/merkle/all');
       const json = await res.json();
       return json.success ? json.data || [] : [];
+    }
+  });
+
+  const anchorMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch('/api/fabric/merkle/anchor', { method: 'POST' });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error);
+      return json;
+    },
+    onSuccess: (data) => {
+      toast.success(`Merkle Root ${data.data.rootId} broadcast successfully`);
+      queryClient.invalidateQueries({ queryKey: ['admin-merkle'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-merkle-all'] });
+      refetchUnanchored();
+      refetchAll();
+    },
+    onError: (err: any) => {
+      toast.error(`Broadcast Failed: ${err.message}`);
     }
   });
 
@@ -142,7 +164,12 @@ export default function AdminDashboard() {
                </div>
 
               {merkleStats?.length > 0 && (
-                <button className="w-full bg-portaccent text-white py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-portaccent/20">
+                <button 
+                  onClick={() => anchorMutation.mutate()}
+                  disabled={anchorMutation.isPending}
+                  className="w-full bg-portaccent text-white py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-portaccent/20 flex items-center justify-center gap-2"
+                >
+                   {anchorMutation.isPending ? <FaSyncAlt className="animate-spin" /> : null}
                    Broadcast Merkle Root
                 </button>
               )}

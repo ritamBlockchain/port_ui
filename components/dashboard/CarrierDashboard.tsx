@@ -1,6 +1,6 @@
 'use client';
 
-import { FaShip, FaFileContract, FaPlus, FaCheckCircle, FaExchangeAlt, FaArrowRight } from 'react-icons/fa';
+import { FaShip, FaFileContract, FaPlus, FaCheckCircle, FaExchangeAlt, FaArrowRight, FaEdit, FaLock, FaCertificate, FaBolt } from 'react-icons/fa';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 
@@ -23,8 +23,47 @@ export default function CarrierDashboard() {
     }
   });
 
+  // Stakeholder Journey Steps
+  const journeySteps = [
+    { id: 1, title: 'Create Draft EBL', description: 'Initialize cargo title', icon: FaPlus, status: 'active' },
+    { id: 2, title: 'Collaborative Revision', description: 'Revise with shipper', icon: FaEdit, status: 'pending' },
+    { id: 3, title: 'Commit Draft', description: 'Finalize for issuance', icon: FaLock, status: 'pending' },
+    { id: 4, title: 'Issue Official EBL', description: 'Mint on blockchain', icon: FaCertificate, status: 'pending' },
+    { id: 5, title: 'Transfer EBL', description: 'Transfer to consignee', icon: FaExchangeAlt, status: 'pending' }
+  ];
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Stakeholder Journey Banner */}
+      <div className="port-card p-6 bg-gradient-to-r from-[#1a2f45] to-[#2a4a6f] text-white rounded-2xl shadow-xl border border-white/10">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-xl font-display font-bold mb-1">Carrier EBL Journey</h3>
+            <p className="text-sm opacity-80">Instant transfer vs 5-7 days for paper, 60% reduction in document handling costs</p>
+          </div>
+          <div className="bg-portaccent/20 px-4 py-2 rounded-xl border border-portaccent/30">
+            <p className="text-2xl font-display font-bold text-portaccent">60%</p>
+            <p className="text-[10px] uppercase tracking-widest text-portaccent">Cost Reduction</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          {journeySteps.map((step, idx) => {
+            const StepIcon = step.icon;
+            return (
+              <div key={step.id} className="flex-1 flex flex-col items-center text-center">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${step.status === 'active' ? 'bg-portaccent text-white' : 'bg-white/10 text-white/60'}`}>
+                  <StepIcon className="text-lg" />
+                </div>
+                <p className="text-xs font-bold uppercase tracking-wider">{step.title}</p>
+                <p className="text-[10px] opacity-60 mt-1">{step.description}</p>
+                {idx < journeySteps.length - 1 && <FaArrowRight className="text-white/20 text-xs mt-2" />}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link href="/ebl/draft/new" className="port-card p-8 bg-[#1a2f45] text-white group hover:shadow-2xl hover:shadow-indigo-900/40 transition-all border-none relative overflow-hidden">
           <div className="relative z-10 flex justify-between items-start mb-4">
@@ -33,10 +72,10 @@ export default function CarrierDashboard() {
             </div>
             <FaFileContract className="text-4xl opacity-20 group-hover:scale-125 transition-transform" />
           </div>
-          <h3 className="relative z-10 text-2xl font-display mb-2">Issue New e-BL</h3>
-          <p className="relative z-10 text-sm opacity-70 leading-relaxed max-w-xs">Digitize cargo title and mint unique e-BL NFTs for global trade.</p>
+          <h3 className="relative z-10 text-2xl font-display mb-2">Create Draft EBL</h3>
+          <p className="relative z-10 text-sm opacity-70 leading-relaxed max-w-xs">Initialize electronic bill of lading with version control enabled.</p>
           <div className="relative z-10 mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest border-t border-white/10 pt-4">
-            Mint Cargo Title <FaArrowRight />
+            Phase 6: Step 1 <FaArrowRight />
           </div>
           <div className="absolute right-0 bottom-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -translate-x-[-20%] -translate-y-[-20%]" />
         </Link>
@@ -53,9 +92,10 @@ export default function CarrierDashboard() {
         </div>
       </div>
 
+      {/* Phase 6: Electronic Bill of Lading Registry */}
       <div className="space-y-6">
         <h4 className="text-xl font-display text-color-text-primary flex items-center gap-2">
-          <FaShip className="text-indigo-600" /> Managed e-Bill of Lading Registry
+          <FaFileContract className="text-indigo-600" /> Phase 6: Electronic Bill of Lading Registry
         </h4>
         
         <div className="port-card bg-white border border-portmid/50 overflow-hidden shadow-sm">
@@ -89,7 +129,9 @@ export default function CarrierDashboard() {
                          <td className="px-6 py-4 text-center">
                             <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase border ${
                               ebl.status === 'surrendered' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 
-                              ebl.status === 'issued' ? 'bg-indigo-50 text-indigo-600 border-indigo-200' : 'bg-gray-50 text-gray-600 border-gray-200'
+                              ebl.status === 'issued' ? 'bg-indigo-50 text-indigo-600 border-indigo-200' : 
+                              ebl.status === 'transferred' ? 'bg-blue-50 text-blue-600 border-blue-200' :
+                              'bg-gray-50 text-gray-600 border-gray-200'
                             }`}>
                                {ebl.status}
                             </span>

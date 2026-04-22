@@ -12,6 +12,7 @@ import ServiceProviderDashboard from '@/components/dashboard/ServiceProviderDash
 import CarrierDashboard from '@/components/dashboard/CarrierDashboard';
 import TradeFinanceDashboard from '@/components/dashboard/TradeFinanceDashboard';
 import AdminDashboard from '@/components/dashboard/AdminDashboard';
+import PortChainFlow from '@/components/dashboard/PortChainFlow';
 
 export default function Dashboard() {
   const { role, user } = useAuth();
@@ -135,6 +136,11 @@ export default function Dashboard() {
             </div>
           );
         })}
+      </div>
+
+      {/* Complete PortChain Flow Visualization */}
+      <div className="pt-4">
+        <PortChainFlow />
       </div>
 
       {/* Role-Specific Content */}

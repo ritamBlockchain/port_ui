@@ -1,6 +1,6 @@
 'use client';
 
-import { FaGavel, FaIdCard, FaHospital, FaCheckCircle, FaExclamationCircle, FaArrowRight, FaClock, FaShieldAlt, FaShip } from 'react-icons/fa';
+import { FaGavel, FaIdCard, FaHospital, FaCheckCircle, FaArrowRight, FaClock, FaShieldAlt, FaShip, FaClipboardCheck, FaSearch } from 'react-icons/fa';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/api/auth';
@@ -23,6 +23,21 @@ export default function RegulatoryDashboard() {
     }
   });
 
+  const { data: completedApprovals } = useQuery({
+    queryKey: ['completed-approvals', role],
+    queryFn: async () => {
+      const res = await fetch('/api/fabric/pre-arrival/all');
+      const json = await res.json();
+      if (!json.success) return [];
+      
+      // Filter submissions where this agency has approved
+      return json.data?.filter((sub: any) => {
+        const myApproval = sub.approvals?.find((a: any) => a.agency === role);
+        return myApproval && myApproval.approved;
+      }) || [];
+    }
+  });
+
   const config = {
     customs: { icon: FaGavel, color: 'bg-amber-600', label: 'Customs Clearance' },
     immigration: { icon: FaIdCard, color: 'bg-green-600', label: 'Immigration Control' },
@@ -32,8 +47,45 @@ export default function RegulatoryDashboard() {
 
   const Icon = config.icon;
 
+  // Stakeholder Journey Steps
+  const journeySteps = [
+    { id: 1, title: 'Review Submission', description: 'Validate cargo & crew', icon: FaSearch, status: 'active' },
+    { id: 2, title: 'Approve/Reject', description: 'Sign compliance decision', icon: FaClipboardCheck, status: 'pending' },
+    { id: 3, title: 'Track Compliance', description: 'Monitor status updates', icon: FaShieldAlt, status: 'pending' }
+  ];
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Stakeholder Journey Banner */}
+      <div className="port-card p-6 bg-gradient-to-r from-[#1a2f45] to-[#2a4a6f] text-white rounded-2xl shadow-xl border border-white/10">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-xl font-display font-bold mb-1">{config.label} Journey</h3>
+            <p className="text-sm opacity-80">80% faster processing with automated validation on blockchain</p>
+          </div>
+          <div className="bg-portaccent/20 px-4 py-2 rounded-xl border border-portaccent/30">
+            <p className="text-2xl font-display font-bold text-portaccent">80%</p>
+            <p className="text-[10px] uppercase tracking-widest text-portaccent">Faster Processing</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          {journeySteps.map((step, idx) => {
+            const StepIcon = step.icon;
+            return (
+              <div key={step.id} className="flex-1 flex flex-col items-center text-center">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${step.status === 'active' ? 'bg-portaccent text-white' : 'bg-white/10 text-white/60'}`}>
+                  <StepIcon className="text-lg" />
+                </div>
+                <p className="text-xs font-bold uppercase tracking-wider">{step.title}</p>
+                <p className="text-[10px] opacity-60 mt-1">{step.description}</p>
+                {idx < journeySteps.length - 1 && <FaArrowRight className="text-white/20 text-xs mt-2" />}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Agency Status Card */}
       <div className="port-card p-8 bg-white border border-portmid/50 flex flex-col md:flex-row items-center gap-8 shadow-sm">
         <div className={`w-20 h-20 rounded-3xl ${config.color} text-white flex items-center justify-center text-4xl shadow-lg`}>
           <Icon />
@@ -51,59 +103,96 @@ export default function RegulatoryDashboard() {
         </div>
       </div>
 
-      <div className="space-y-6">
-        <h4 className="text-xl font-display text-color-text-primary flex items-center gap-2">
-          <FaClock className="text-amber-500" /> Critical Pending Reviews
-        </h4>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {pendingApprovals?.length ? pendingApprovals.map((sub: any) => (
-            <div key={sub.submissionId} className="port-card p-6 bg-white border border-portmid/50 hover:border-portaccent transition-all group group relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-16 h-16 bg-portbase rotate-45 translate-x-8 -translate-y-8 group-hover:bg-portaccent transition-colors" />
-              
-              <div className="flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-portbase flex items-center justify-center text-portaccent font-bold">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Pending Reviews - Phase 2 */}
+        <div className="space-y-6">
+          <h4 className="text-xl font-display text-color-text-primary flex items-center gap-2">
+            <FaClock className="text-amber-500" /> Phase 2: Pending Reviews
+          </h4>
+          
+          <div className="grid grid-cols-1 gap-4">
+            {pendingApprovals?.length ? pendingApprovals.map((sub: any) => (
+              <div key={sub.submissionId} className="port-card p-6 bg-white border border-portmid/50 hover:border-portaccent transition-all group relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-16 h-16 bg-portbase rotate-45 translate-x-8 -translate-y-8 group-hover:bg-portaccent transition-colors" />
+                
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-portbase flex items-center justify-center text-portaccent font-bold shrink-0">
                     <FaShip />
                   </div>
-                  <div>
-                    <h5 className="font-bold text-sm uppercase tracking-tight line-clamp-1">{sub.vesselName}</h5>
+                  <div className="flex-1">
+                    <h5 className="font-bold text-sm uppercase tracking-tight">{sub.vesselName}</h5>
                     <p className="text-[10px] text-color-text-muted font-mono">{sub.vesselIMO}</p>
                   </div>
+                  <Link 
+                    href={`/pre-arrival/${sub.submissionId}`}
+                    className="bg-portbase group-hover:bg-portaccent group-hover:text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest text-portaccent transition-all flex items-center gap-2 shrink-0"
+                  >
+                    Review <FaArrowRight />
+                  </Link>
                 </div>
 
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between text-[10px] uppercase font-bold tracking-widest text-color-text-muted">
-                    <span>ETA</span>
-                    <span className="text-color-text-primary">{new Date(sub.etaTimestamp).toLocaleDateString()}</span>
+                <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-portmid/10">
+                  <div className="text-center">
+                    <p className="text-[10px] uppercase font-bold tracking-widest text-color-text-muted">ETA</p>
+                    <p className="text-sm font-bold text-color-text-primary">{new Date(sub.etaTimestamp).toLocaleDateString()}</p>
                   </div>
-                  <div className="flex justify-between text-[10px] uppercase font-bold tracking-widest text-color-text-muted">
-                    <span>Purpose</span>
-                    <span className="text-color-text-primary">{sub.portCallPurpose}</span>
+                  <div className="text-center">
+                    <p className="text-[10px] uppercase font-bold tracking-widest text-color-text-muted">Purpose</p>
+                    <p className="text-sm font-bold text-color-text-primary">{sub.portCallPurpose}</p>
                   </div>
-                  <div className="flex justify-between text-[10px] uppercase font-bold tracking-widest text-color-text-muted">
-                    <span>Status</span>
-                    <span className="bg-amber-50 text-amber-600 px-2 rounded border border-amber-200">{sub.status}</span>
+                  <div className="text-center">
+                    <p className="text-[10px] uppercase font-bold tracking-widest text-color-text-muted">Status</p>
+                    <span className="bg-amber-50 text-amber-600 px-2 py-1 rounded border border-amber-200 text-xs font-bold uppercase">{sub.status}</span>
                   </div>
                 </div>
+              </div>
+            )) : (
+              <div className="py-10 bg-emerald-50/30 rounded-2xl border-2 border-dashed border-emerald-200 text-center flex flex-col items-center gap-3">
+                <FaCheckCircle className="text-4xl text-emerald-400" />
+                <div>
+                  <h4 className="text-lg font-display text-emerald-800">No Pending Reviews</h4>
+                  <p className="text-sm text-emerald-600">All submissions have been processed for your agency.</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
-                <Link 
-                  href={`/pre-arrival/${sub.submissionId}`}
-                  className="mt-auto w-full bg-portbase group-hover:bg-portaccent group-hover:text-white py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-portaccent text-center transition-all flex items-center justify-center gap-2"
-                >
-                  Verify Compliance <FaArrowRight />
-                </Link>
+        {/* Completed Approvals */}
+        <div className="space-y-6">
+          <h4 className="text-xl font-display text-color-text-primary flex items-center gap-2 text-emerald-600">
+            <FaCheckCircle /> Completed Approvals
+          </h4>
+          
+          <div className="grid grid-cols-1 gap-4">
+            {completedApprovals?.length ? completedApprovals.slice(0, 5).map((sub: any) => (
+              <div key={sub.submissionId} className="port-card p-4 bg-emerald-50/30 border border-emerald-100 hover:border-emerald-300 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                      <FaCheckCircle />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold uppercase">{sub.vesselName}</p>
+                      <p className="text-[10px] text-color-text-muted font-mono">{sub.vesselIMO}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase border border-emerald-200">
+                      Approved
+                    </span>
+                    <p className="text-[10px] text-color-text-muted mt-1">
+                      {new Date(sub.approvals?.find((a: any) => a.agency === role)?.timestamp || sub.submittedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-          )) : (
-            <div className="col-span-full py-20 bg-emerald-50/30 rounded-3xl border-2 border-dashed border-emerald-200 text-center flex flex-col items-center gap-4">
-              <FaCheckCircle className="text-5xl text-emerald-400" />
-              <div>
-                <h4 className="text-xl font-display text-emerald-800">Operational Queue Empty</h4>
-                <p className="text-sm text-emerald-600">All current submissions have been processed for your agency.</p>
+            )) : (
+              <div className="py-10 bg-portbase/30 rounded-2xl border border-portmid/20 text-center">
+                <p className="text-sm text-color-text-muted italic">No completed approvals yet</p>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

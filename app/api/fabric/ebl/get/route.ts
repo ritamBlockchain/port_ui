@@ -7,9 +7,10 @@ export async function GET(req: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-      // Fetch all eBLs using the newly added QueryAssets function
-      const result = await evaluateTransaction('QueryAssets', '{"selector":{"eblId":{"$gt":null}}}');
-      const rawData = JSON.parse(result.toString());
+      // Fetch all eBLs using prefix query for CouchDB compatibility
+      const result = await evaluateTransaction('QueryAssets', 'prefix:ebl:');
+      const resultString = result.toString();
+      const rawData = resultString && resultString.trim() !== '' ? JSON.parse(resultString) : [];
       const data = rawData.map((item: string) => {
         const obj = JSON.parse(item);
         return {

@@ -9,7 +9,8 @@ export async function GET() {
     console.log('Fetching live credentials using Prefix Query...');
     const result = await evaluateTransaction('QueryAssets', query);
     
-    const rawData = JSON.parse(result.toString());
+    const resultString = result.toString();
+    const rawData = resultString && resultString.trim() !== '' ? JSON.parse(resultString) : [];
     const data = rawData.map((item: string) => JSON.parse(item));
 
     return NextResponse.json({ success: true, data });

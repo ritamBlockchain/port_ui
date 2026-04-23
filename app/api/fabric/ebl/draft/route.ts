@@ -7,9 +7,10 @@ export async function GET(req: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-      // List all drafts
-      const result = await evaluateTransaction('QueryAssets', '{"selector":{"docType":"draftebl"}}');
-      const raw = JSON.parse(result.toString());
+      // List all drafts using prefix query for CouchDB compatibility
+      const result = await evaluateTransaction('QueryAssets', 'prefix:draftebl:');
+      const resultString = result.toString();
+      const raw = resultString && resultString.trim() !== '' ? JSON.parse(resultString) : [];
       const data = raw.map((item: string) => {
         const obj = JSON.parse(item);
         // Normalize common Go-style casing to camelCase for the UI

@@ -31,6 +31,26 @@ export default function CredentialDetailPage() {
     }
   });
 
+  const { data: auditLog } = useQuery({
+    queryKey: ['credential-audit', credentialId],
+    queryFn: async () => {
+      const res = await fetch(`/api/fabric/credentials/audit-log?credentialId=${credentialId}`);
+      const json = await res.json();
+      if (!json.success) return [];
+      return json.data;
+    }
+  });
+
+  const { data: verificationLog } = useQuery({
+    queryKey: ['credential-verification', credentialId],
+    queryFn: async () => {
+      const res = await fetch(`/api/fabric/credentials/verification-log?credentialId=${credentialId}`);
+      const json = await res.json();
+      if (!json.success) return [];
+      return json.data;
+    }
+  });
+
   const revokeMutation = useMutation({
     mutationFn: async () => {
       const res = await fetch('/api/fabric/credentials/revoke', {
@@ -216,6 +236,53 @@ export default function CredentialDetailPage() {
         </div>
       )}
 
+      {/* Audit Log */}
+      <div className="port-card p-6 bg-white">
+        <h4 className="font-display text-portaccent flex items-center gap-2 mb-4">
+            <FaSync /> Audit Log
+        </h4>
+        {auditLog && auditLog.length > 0 ? (
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {auditLog.map((entry: any) => (
+              <div key={entry.auditId} className="text-xs p-3 bg-portsurface/50 rounded border border-portmid/30">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-bold uppercase text-portaccent">{entry.action}</span>
+                  <span className="text-color-text-muted">{formatDate(entry.performedAt)}</span>
+                </div>
+                <p className="text-color-text-secondary">By: {entry.performedBy.split('@')[0]}</p>
+                {entry.notes && <p className="text-color-text-muted italic mt-1">{entry.notes}</p>}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-color-text-muted italic">No audit log entries found</p>
+        )}
+      </div>
+
+      {/* Verification Log */}
+      <div className="port-card p-6 bg-white">
+        <h4 className="font-display text-emerald-600 flex items-center gap-2 mb-4">
+            <FaCheckCircle /> Verification Log
+        </h4>
+        {verificationLog && verificationLog.length > 0 ? (
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {verificationLog.map((entry: any) => (
+              <div key={entry.logId} className={`text-xs p-3 rounded border ${entry.isValid ? 'bg-emerald-50 border-emerald-200' : 'bg-rose-50 border-rose-200'}`}>
+                <div className="flex justify-between items-center mb-1">
+                  <span className={`font-bold uppercase ${entry.isValid ? 'text-emerald-600' : 'text-rose-600'}`}>
+                    {entry.isValid ? 'Valid' : 'Invalid'}
+                  </span>
+                  <span className="text-color-text-muted">{formatDate(entry.verifiedAt)}</span>
+                </div>
+                <p className="text-color-text-secondary">Verified by: {entry.verifiedBy.split('@')[0]}</p>
+                {entry.notes && <p className="text-color-text-muted italic mt-1">{entry.notes}</p>}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-xs text-color-text-muted italic">No verification log entries found</p>
+        )}
+      </div>
 
       <div className="port-card p-6 bg-indigo-50 border-indigo-100">
         <h4 className="font-display text-indigo-900 flex items-center gap-2 mb-2">

@@ -26,6 +26,9 @@ export default function CredentialsPage() {
             <button onClick={() => refetch()} className="p-2 border border-portmid rounded-lg text-portaccent">
                 <FaSync className={isLoading ? 'animate-spin' : ''} />
             </button>
+            <Link href="/credentials/revocations" className="px-4 py-2 border border-rose-200 text-rose-600 rounded-lg font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-rose-50 transition-all">
+                <FaExclamationTriangle /> Revocation List
+            </Link>
             <Link href="/credentials/issue" className="port-btn-primary flex items-center gap-2">
             <FaPlus /> Issue New Credential
             </Link>

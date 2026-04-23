@@ -28,6 +28,8 @@ export default function IssueEBLPage() {
     notifyParty: 'EuroTrade Wholesalers B.V.',
     goodsDetails: '2000 units High-Precision Electronic Sensors in 20ft Container'
   });
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [isLoadingInvoices, setIsLoadingInvoices] = useState(false);
 
   useEffect(() => {
     async function loadSubmissions() {
@@ -50,18 +52,48 @@ export default function IssueEBLPage() {
     loadSubmissions();
   }, []);
 
+  useEffect(() => {
+    async function loadInvoices() {
+      if (!formData.submissionId) return;
+      setIsLoadingInvoices(true);
+      try {
+        const res = await fetch('/api/fabric/invoices/all');
+        const json = await res.json();
+        if (json.success) {
+          const subInvoices = json.data.filter((inv: any) => inv.submissionId === formData.submissionId);
+          setInvoices(subInvoices);
+        }
+      } catch (err) {
+        console.error('Failed to load invoices', err);
+      } finally {
+        setIsLoadingInvoices(false);
+      }
+    }
+    loadInvoices();
+  }, [formData.submissionId]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.submissionId) {
         toast.error('You must link this eBL to a valid Pre-Arrival Submission');
         return;
     }
+    
+    // Check if invoice is paid before allowing eBL issuance
+    const hasPaidInvoice = invoices.some((inv: any) => inv.status === 'paid');
+    if (!hasPaidInvoice) {
+        toast.error('Invoice must be paid before issuing eBL. Please have the shipping agent pay the invoice first.');
+        return;
+    }
+    
     issue.mutate(formData, {
       onSuccess: () => {
         router.push('/ebl');
       }
     });
   };
+
+  const canIssueEBL = formData.submissionId && invoices.some((inv: any) => inv.status === 'paid');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -115,6 +147,32 @@ export default function IssueEBLPage() {
               </select>
             </div>
           </div>
+
+          {/* Invoice Payment Status */}
+          {formData.submissionId && (
+            <div className="mt-4 p-4 bg-portbase rounded-lg border border-portmid">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-color-text-muted block mb-2">Invoice Payment Status</label>
+              {isLoadingInvoices ? (
+                <div className="flex items-center gap-2 text-xs italic text-color-text-muted">
+                  <FaSync className="animate-spin text-portaccent" /> Checking invoice status...
+                </div>
+              ) : invoices.length > 0 ? (
+                invoices.some((inv: any) => inv.status === 'paid') ? (
+                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-600">
+                    <FaFileInvoice className="text-emerald-500" /> Invoice Paid - eBL can be issued
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-xs font-bold text-rose-600">
+                    <FaFileInvoice className="text-rose-500" /> Invoice Not Paid - eBL issuance blocked
+                  </div>
+                )
+              ) : (
+                <div className="flex items-center gap-2 text-xs text-amber-600">
+                  <FaFileInvoice /> No invoice found for this submission
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Voyage Information */}
@@ -186,11 +244,11 @@ export default function IssueEBLPage() {
         <div className="flex gap-4">
           <button 
             type="submit" 
-            disabled={issue.isPending}
-            className="flex-1 bg-portaccent text-white font-bold py-4 rounded-xl shadow-lg shadow-portaccent/20 hover:scale-[1.02] active:scale-95 transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-3"
+            disabled={issue.isPending || !canIssueEBL}
+            className={`flex-1 font-bold py-4 rounded-xl shadow-lg transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-3 ${canIssueEBL ? 'bg-portaccent text-white hover:scale-[1.02] active:scale-95 shadow-portaccent/20' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
           >
             {issue.isPending ? <FaSync className="animate-spin" /> : <FaArrowRight />} 
-            {issue.isPending ? 'Committing to Ledger...' : 'Issue e-Bill of Lading'}
+            {issue.isPending ? 'Committing to Ledger...' : !canIssueEBL ? 'Invoice Must Be Paid First' : 'Issue e-Bill of Lading'}
           </button>
           <button 
             type="button" 

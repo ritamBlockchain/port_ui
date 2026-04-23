@@ -2,46 +2,87 @@
 
 import { useAuth } from '@/lib/api/auth';
 import { Role } from '@/lib/types/portchain';
-import { FaUserShield, FaShip, FaGavel, FaIdCard, FaHospital, FaAnchor, FaBox, FaBuilding, FaUniversity, FaTools, FaCheckDouble } from 'react-icons/fa';
+import { 
+  ShieldCheck, Ship, Scale, Anchor, UserRound, 
+  Hospital, FileBadge, Box, Building2, University, 
+  Settings, CheckCircle2, Search
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const roleConfig: Record<Role, { icon: any; color: string; label: string }> = {
-  admin: { icon: FaUserShield, color: 'text-red-500', label: 'Admin' },
-  shippingagent: { icon: FaShip, color: 'text-blue-500', label: 'Shipping Agent' },
-  customs: { icon: FaGavel, color: 'text-amber-600', label: 'Customs' },
-  portauthority: { icon: FaAnchor, color: 'text-indigo-600', label: 'Port Authority' },
-  immigration: { icon: FaIdCard, color: 'text-green-600', label: 'Immigration' },
-  portHealth: { icon: FaHospital, color: 'text-pink-500', label: 'Port Health' },
-  registrar: { icon: FaIdCard, color: 'text-purple-600', label: 'Registrar' },
-  carrier: { icon: FaShip, color: 'text-cyan-600', label: 'Carrier' },
-  shipper: { icon: FaBox, color: 'text-orange-500', label: 'Shipper' },
-  consignee: { icon: FaBuilding, color: 'text-slate-600', label: 'Consignee' },
-  banktrade: { icon: FaUniversity, color: 'text-emerald-600', label: 'Bank' },
-  serviceprovider: { icon: FaTools, color: 'text-gray-600', label: 'Service Provider' },
-  verifier: { icon: FaCheckDouble, color: 'text-teal-600', label: 'Verifier' },
+  admin: { icon: ShieldCheck, color: 'text-rose-500', label: 'Admin' },
+  shippingagent: { icon: Ship, color: 'text-sky-500', label: 'Shipping Agent' },
+  customs: { icon: Scale, color: 'text-amber-500', label: 'Customs' },
+  portauthority: { icon: Anchor, color: 'text-indigo-500', label: 'Port Authority' },
+  immigration: { icon: UserRound, color: 'text-emerald-500', label: 'Immigration' },
+  portHealth: { icon: Hospital, color: 'text-pink-500', label: 'Port Health' },
+  registrar: { icon: FileBadge, color: 'text-violet-500', label: 'Registrar' },
+  carrier: { icon: Ship, color: 'text-cyan-500', label: 'Carrier' },
+  shipper: { icon: Box, color: 'text-orange-500', label: 'Shipper' },
+  consignee: { icon: Building2, color: 'text-slate-500', label: 'Consignee' },
+  banktrade: { icon: University, color: 'text-teal-500', label: 'Bank' },
+  serviceprovider: { icon: Settings, color: 'text-gray-500', label: 'Service Provider' },
+  verifier: { icon: CheckCircle2, color: 'text-blue-500', label: 'Verifier' },
 };
 
-export default function RoleSwitcher() {
+interface RoleSwitcherProps {
+  isCollapsed?: boolean;
+}
+
+export default function RoleSwitcher({ isCollapsed }: RoleSwitcherProps) {
   const { role, setRole } = useAuth();
 
   return (
-    <div className="flex flex-col gap-2 p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-portmid">
-      <h3 className="text-sm font-semibold uppercase tracking-wider text-color-text-secondary mb-2">Test Identities</h3>
-      <div className="grid grid-cols-1 gap-1 max-h-[400px] overflow-y-auto pr-2">
+    <div className={cn(
+      "flex flex-col gap-2 transition-all duration-300",
+      isCollapsed ? "items-center" : "p-2"
+    )}>
+      {!isCollapsed && (
+        <div className="flex items-center justify-between px-2 mb-1">
+          <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/40">Test Identities</h3>
+          <Search className="w-3 h-3 text-white/20" />
+        </div>
+      )}
+      
+      <div className={cn(
+        "grid grid-cols-1 gap-1 overflow-y-auto custom-scrollbar pr-1",
+        isCollapsed ? "max-h-[300px]" : "max-h-[240px]"
+      )}>
         {Object.entries(roleConfig).map(([r, config]) => {
           const Icon = config.icon;
           const isActive = role === r;
+          
           return (
             <button
               key={r}
               onClick={() => setRole(r as Role)}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
+              title={config.label}
+              className={cn(
+                "group relative flex items-center gap-3 rounded-lg transition-all duration-200",
+                isCollapsed ? "p-2 justify-center" : "px-3 py-1.5",
                 isActive 
-                  ? 'bg-portaccent text-white shadow-md scale-[1.02]' 
-                  : 'hover:bg-portmid/50 text-color-text-secondary'
-              }`}
+                  ? "bg-white/10 text-white ring-1 ring-white/20 shadow-lg" 
+                  : "hover:bg-white/5 text-white/60 hover:text-white"
+              )}
             >
-              <Icon className={isActive ? 'text-white' : config.color} />
-              <span className="text-sm font-medium">{config.label}</span>
+              <div className={cn(
+                "transition-transform duration-200 group-hover:scale-110",
+                isActive ? "text-white" : config.color
+              )}>
+                <Icon size={isCollapsed ? 18 : 16} strokeWidth={isActive ? 2.5 : 2} />
+              </div>
+              
+              {!isCollapsed && (
+                <span className="text-xs font-medium truncate">{config.label}</span>
+              )}
+              
+              {isActive && !isCollapsed && (
+                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-portaccent animate-pulse" />
+              )}
+              
+              {isCollapsed && isActive && (
+                <div className="absolute left-0 w-1 h-4 bg-portaccent rounded-r-full" />
+              )}
             </button>
           );
         })}
@@ -49,3 +90,4 @@ export default function RoleSwitcher() {
     </div>
   );
 }
+

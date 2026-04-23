@@ -23,10 +23,14 @@ export async function POST(req: NextRequest) {
     let assignmentId = body.assignmentId || '';
     if (!assignmentId) {
       try {
-        const berthsResult = await evaluateTransaction('QueryAssets', `{"selector":{"submissionId":"${submissionId}"}}`);
-        const berths = JSON.parse(berthsResult.toString());
-        if (berths && berths.length > 0) {
-          const berthRecord = berths.map((r: string) => JSON.parse(r)).find((b: any) => b.assignmentId);
+        // Use prefix query for LevelDB/CouchDB compatibility
+        const berthsResult = await evaluateTransaction('QueryAssets', 'prefix:berth:');
+        const berthString = berthsResult.toString();
+        if (berthString && berthString.trim() !== '') {
+          const berths = JSON.parse(berthString);
+          const berthRecord = berths
+            .map((r: string) => JSON.parse(r))
+            .find((b: any) => b.submissionId === submissionId);
           if (berthRecord) assignmentId = berthRecord.assignmentId;
         }
       } catch (e) {

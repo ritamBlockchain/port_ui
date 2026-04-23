@@ -3,16 +3,18 @@ import { submitTransaction } from '@/lib/fabric/connection';
 
 export async function POST(req: NextRequest) {
   try {
-    const { logId, remarks = 'Service completed', quantity = 1.0 } = await req.json();
+    const body = await req.json();
+    const logId = body.logId;
+    const remarks = body.remarks || 'Service completed';
+    const quantity = body.durationMins || body.quantity || 1.0;
 
     if (!logId) {
       return NextResponse.json({ success: false, error: 'logId is required' }, { status: 400 });
     }
 
-    console.log(`[API] Completing Service ${logId} (Quantity: ${quantity})`);
+    console.log(`[API] Completing Service ${logId} (Final Quantity: ${quantity})`);
 
     // Contract: CompleteService(ctx, logId, remarks string, quantity float64)
-    // We send quantity as a string, contractapi-go will parse to float64
     const result = await submitTransaction(
       'CompleteService',
       logId.toString(),

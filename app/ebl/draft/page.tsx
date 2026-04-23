@@ -35,7 +35,7 @@ export default function IssueEBLPage() {
         const res = await fetch('/api/fabric/pre-arrival/get');
         const json = await res.json();
         if (json.success) {
-          const approved = json.data.filter((s: any) => s.status === 'approved' || s.status === 'compliant' || s.status === 'pending');
+          const approved = json.data.filter((s: any) => s.status === 'approved');
           setSubmissions(approved);
           if (approved.length > 0) {
             setFormData(prev => ({ ...prev, submissionId: approved[0].submissionId }));

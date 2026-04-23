@@ -3,10 +3,11 @@
 import { useParams, useRouter } from 'next/navigation';
 import { usePreArrival } from '@/hooks/usePreArrival';
 import { useAuth } from '@/lib/api/auth';
-import { FaArrowLeft, FaShip, FaUserCircle, FaBox, FaHistory, FaCheckCircle, FaExclamationTriangle, FaShieldAlt, FaAnchor } from 'react-icons/fa';
+import { FaArrowLeft, FaShip, FaUserCircle, FaBox, FaHistory, FaCheckCircle, FaExclamationTriangle, FaShieldAlt, FaAnchor, FaClipboardCheck, FaPlay, FaTools } from 'react-icons/fa';
 import Link from 'next/link';
 import HashDisplay from '@/components/shared/HashDisplay';
 import ApprovalPanel from '@/components/pre-arrival/ApprovalPanel';
+import ServiceRequest from '@/components/pre-arrival/ServiceRequest';
 
 export default function PreArrivalDetailPage() {
   const { submissionId } = useParams();
@@ -186,56 +187,162 @@ export default function PreArrivalDetailPage() {
           </section>
         </div>
 
-        {/* Audit & Approvals (Sidebar) */}
-        <div className="space-y-8">
-            {['pending', 'submitted'].includes(submission.status?.toLowerCase() || '') && (
-               <button 
-                 onClick={() => validateCompliance.mutate()}
-                 disabled={validateCompliance.isPending}
-                 className="w-full port-card p-4 bg-indigo-50 border-2 border-indigo-200 text-indigo-700 flex items-center justify-center gap-3 hover:bg-indigo-100 transition-all font-display shadow-lg shadow-indigo-100/50 group"
-              >
-                <FaShieldAlt className={`group-hover:rotate-12 transition-transform ${validateCompliance.isPending ? 'animate-spin' : ''}`} />
-                {validateCompliance.isPending ? 'Verifying Cargo Manifest...' : 'Trigger Compliance Check'}
-              </button>
-            )}
-
-            {submission.status?.toLowerCase() === 'compliant' && (
-               <div className="w-full port-card p-4 bg-emerald-50 border-2 border-emerald-200 text-emerald-700 flex items-center justify-center gap-3 font-display shadow-lg shadow-emerald-100/50 animate-in zoom-in-95 duration-300">
-                  <FaCheckCircle className="text-emerald-500" />
-                  Compliance Verified
-               </div>
-            )}
-            {submission.status?.toLowerCase() === 'approved' && ['admin', 'portauthority'].includes(role) && (
-              <Link 
-                href="/berth" 
-                className="port-card p-4 bg-indigo-600 text-white flex items-center justify-center gap-3 hover:bg-indigo-700 transition-all font-display shadow-lg shadow-indigo-100"
-              >
-                <FaAnchor /> Assign Berth Portfolio
-              </Link>
-            )}
-            {['compliant', 'pending', 'submitted'].includes(submission.status?.toLowerCase() || '') && (
-              <ApprovalPanel submissionId={submission.submissionId} />
-            )}
-
-            <section className="port-card p-6 space-y-4">
-                <h3 className="font-display text-xl flex items-center gap-2 border-b border-portmid pb-2">
-                    <FaHistory className="text-portaccent" /> Audit History
-                </h3>
-                <div className="space-y-4">
-                    <div className="relative pl-6 border-l-2 border-dashed border-portmid">
-                         <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-portaccent" />
-                         <p className="text-xs font-bold text-color-text-primary uppercase tracking-widest">Submitted to Ledger</p>
-                         <p className="text-[10px] text-color-text-muted">{new Date(submission.submittedAt).toLocaleString()}</p>
-                    </div>
-                    {submission.approvals.map((app, i) => (
-                        <div key={i} className="relative pl-6 border-l-2 border-dashed border-portmid">
-                            <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full ${app.approved ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                            <p className="text-xs font-bold text-color-text-primary uppercase tracking-widest">{app.agency} Review</p>
-                            <p className="text-[10px] text-color-text-muted">{app.comments || 'No comments'}</p>
-                        </div>
-                    ))}
+        {/* Flow Sidebar */}
+        <div className="space-y-6">
+          <div className="port-card p-6 space-y-4">
+            <h3 className="font-display text-lg flex items-center gap-2 border-b border-portmid pb-3">
+              <FaClipboardCheck className="text-portaccent" /> Workflow Steps
+            </h3>
+            
+            <div className="space-y-3">
+              {/* Step 1: Compliance Check */}
+              <div className={`p-4 rounded-xl border-2 ${['pending', 'submitted'].includes(submission.status?.toLowerCase() || '') ? 'bg-indigo-50 border-indigo-300' : 'bg-gray-50 border-gray-200'}`}>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${['pending', 'submitted'].includes(submission.status?.toLowerCase() || '') ? 'bg-indigo-600 text-white' : 'bg-gray-400 text-white'}`}>
+                    1
+                  </div>
+                  <span className="font-bold text-sm">Compliance Check</span>
                 </div>
-            </section>
+                {['pending', 'submitted'].includes(submission.status?.toLowerCase() || '') && (
+                  <button 
+                    onClick={() => validateCompliance.mutate()}
+                    disabled={validateCompliance.isPending}
+                    className="w-full mt-2 port-btn-primary flex items-center justify-center gap-2 py-2 text-sm"
+                  >
+                    <FaShieldAlt className={validateCompliance.isPending ? 'animate-spin' : ''} />
+                    {validateCompliance.isPending ? 'Checking...' : 'Check Compliance'}
+                  </button>
+                )}
+                {submission.status?.toLowerCase() === 'compliant' && (
+                  <div className="mt-2 flex items-center gap-2 text-emerald-600 text-sm font-bold">
+                    <FaCheckCircle /> Verified
+                  </div>
+                )}
+              </div>
+
+              {/* Step 2: Agency Approvals */}
+              <div className={`p-4 rounded-xl border-2 ${['compliant', 'pending', 'submitted'].includes(submission.status?.toLowerCase() || '') ? 'bg-amber-50 border-amber-300' : 'bg-gray-50 border-gray-200'}`}>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${['compliant', 'pending', 'submitted'].includes(submission.status?.toLowerCase() || '') ? 'bg-amber-500 text-white' : 'bg-gray-400 text-white'}`}>
+                    2
+                  </div>
+                  <span className="font-bold text-sm">Agency Approvals</span>
+                </div>
+                {['compliant', 'pending', 'submitted'].includes(submission.status?.toLowerCase() || '') && (
+                  <ApprovalPanel submissionId={submission.submissionId} />
+                )}
+                {submission.status?.toLowerCase() === 'approved' && (
+                  <div className="mt-2 flex items-center gap-2 text-emerald-600 text-sm font-bold">
+                    <FaCheckCircle /> Approved
+                  </div>
+                )}
+              </div>
+
+              {/* Step 3: Berth Assignment (Port Authority only) */}
+              {['admin', 'portauthority'].includes(role) && (
+                <div className={`p-4 rounded-xl border-2 ${submission.status?.toLowerCase() === 'approved' ? 'bg-blue-50 border-blue-300' : 'bg-gray-50 border-gray-200'}`}>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${submission.status?.toLowerCase() === 'approved' ? 'bg-blue-600 text-white' : 'bg-gray-400 text-white'}`}>
+                      3
+                    </div>
+                    <span className="font-bold text-sm">Berth Assignment</span>
+                  </div>
+                  {submission.status?.toLowerCase() === 'approved' && !submission.berthAssignment && (
+                    <Link 
+                      href="/berth" 
+                      className="w-full mt-2 port-btn-primary flex items-center justify-center gap-2 py-2 text-sm"
+                    >
+                      <FaAnchor /> Assign Berth
+                    </Link>
+                  )}
+                  {submission.berthAssignment && (
+                    <div className="mt-2 flex items-center gap-2 text-emerald-600 text-sm font-bold">
+                      <FaCheckCircle /> Assigned
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Step 4: Request Service (Shipping Agent only, after berth) */}
+              {role === 'shippingagent' && (
+                <div className={`p-4 rounded-xl border-2 ${submission.berthAssignment ? 'bg-purple-50 border-purple-300' : 'bg-gray-50 border-gray-200'}`}>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${submission.berthAssignment ? 'bg-purple-600 text-white' : 'bg-gray-400 text-white'}`}>
+                      4
+                    </div>
+                    <span className="font-bold text-sm">Request Services</span>
+                  </div>
+                  {submission.berthAssignment && (
+                    <ServiceRequest
+                      submissionId={submission.submissionId}
+                      vesselIMO={submission.vesselIMO}
+                      onRequestSuccess={() => window.location.reload()}
+                    />
+                  )}
+                  {!submission.berthAssignment && (
+                    <p className="text-[10px] text-color-text-muted mt-2">Awaiting berth assignment</p>
+                  )}
+                </div>
+              )}
+
+              {/* Step 5: View Service Requests (Shipping Agent) */}
+              {role === 'shippingagent' && (
+                <div className={`p-4 rounded-xl border-2 bg-blue-50 border-blue-300`}>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-blue-600 text-white">
+                      5
+                    </div>
+                    <span className="font-bold text-sm">Your Service Requests</span>
+                  </div>
+                  <Link
+                    href="/services?submissionId={submission.submissionId}"
+                    className="w-full mt-2 port-btn-primary flex items-center justify-center gap-2 py-2 text-sm"
+                  >
+                    View Request Status
+                  </Link>
+                </div>
+              )}
+
+              {/* Step 5: Start/Complete Service (Service Provider only) */}
+              {role === 'serviceprovider' && (
+                <div className={`p-4 rounded-xl border-2 bg-green-50 border-green-300`}>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center bg-green-600 text-white">
+                      5
+                    </div>
+                    <span className="font-bold text-sm">Manage Services</span>
+                  </div>
+                  <Link 
+                    href="/" 
+                    className="w-full mt-2 port-btn-primary flex items-center justify-center gap-2 py-2 text-sm"
+                  >
+                    <FaTools /> Go to Service Dashboard
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Audit History */}
+          <section className="port-card p-6 space-y-4">
+            <h3 className="font-display text-lg flex items-center gap-2 border-b border-portmid pb-2">
+              <FaHistory className="text-portaccent" /> Audit History
+            </h3>
+            <div className="space-y-4">
+              <div className="relative pl-6 border-l-2 border-dashed border-portmid">
+                <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-portaccent" />
+                <p className="text-xs font-bold text-color-text-primary uppercase tracking-widest">Submitted to Ledger</p>
+                <p className="text-[10px] text-color-text-muted">{new Date(submission.submittedAt).toLocaleString()}</p>
+              </div>
+              {submission.approvals.map((app, i) => (
+                <div key={i} className="relative pl-6 border-l-2 border-dashed border-portmid">
+                  <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full ${app.approved ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                  <p className="text-xs font-bold text-color-text-primary uppercase tracking-widest">{app.agency} Review</p>
+                  <p className="text-[10px] text-color-text-muted">{app.comments || 'No comments'}</p>
+                </div>
+              ))}
+            </div>
+          </section>
         </div>
       </div>
     </div>

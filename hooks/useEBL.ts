@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 export function useEBL(eblId?: string) {
   const queryClient = useQueryClient();
 
-  const { data: ebl, isLoading, error, refetch } = useQuery({
+  const { data: ebl, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['ebl', eblId],
     queryFn: async () => {
       if (!eblId) return null;
@@ -105,7 +105,7 @@ export function useEBLList() {
 export function useDraftEBL(draftId?: string) {
   const queryClient = useQueryClient();
 
-  const { data: draft, isLoading, error, refetch } = useQuery({
+  const { data: draft, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['ebl-draft', draftId],
     queryFn: async () => {
       if (!draftId) return null;
@@ -138,7 +138,7 @@ export function useDraftEBL(draftId?: string) {
     }
   });
 
-  return { draft, isLoading, error, refetch, performAction: draftActionMutation };
+  return { draft, isLoading, isError, error, refetch, performAction: draftActionMutation };
 }
 
 export function useDraftList() {

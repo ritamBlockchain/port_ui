@@ -15,7 +15,19 @@ export async function GET() {
     }
     
     const rawData = JSON.parse(resultString);
-    const data = rawData.map((item: string) => JSON.parse(item));
+    const data = rawData.map((item: string) => {
+        const obj = JSON.parse(item);
+        return {
+            ...obj,
+            // Map ledger's Quantity/quantity to frontend's durationMins
+            durationMins: obj.quantity || obj.Quantity || 0,
+            logId: obj.logId || obj.LogId,
+            status: obj.status || obj.Status,
+            submissionId: obj.submissionId || obj.SubmissionId,
+            serviceType: obj.serviceType || obj.ServiceType,
+            vesselIMO: obj.vesselIMO || obj.VesselIMO
+        };
+    });
 
     return NextResponse.json({ success: true, data });
   } catch (error: any) {

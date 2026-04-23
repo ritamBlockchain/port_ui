@@ -45,41 +45,42 @@ export default function DraftList() {
       ) : drafts && drafts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Deduplicate records to prevent React key errors during ledger synchronization */}
-          {Array.from(new Map(drafts.map((d: any) => [d.draftId, d])).values()).map((draft: any, index) => {
+          {Array.from(new Map(drafts.map((d: any) => [d.draftId || d.eblId || d.ID || d.id, d])).values()).map((draft: any, index) => {
+            const currentId = draft.draftId || draft.eblId || draft.ID || draft.id;
             const status = statusMap[draft.status as keyof typeof statusMap] || statusMap.draft;
             const StatusIcon = status.icon;
             
             return (
-              <div key={`${draft.draftId}-${index}`} className="port-card group hover:shadow-xl transition-all animate-in zoom-in-95 duration-300 overflow-hidden border-t-4 border-t-portaccent">
+              <div key={`${currentId}-${index}`} className="port-card group hover:shadow-xl transition-all animate-in zoom-in-95 duration-300 overflow-hidden border-t-4 border-t-portaccent">
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
                      <div>
-                        <h3 className="font-display text-lg text-color-text-primary">{draft.blNumber}</h3>
-                        <p className="text-[10px] font-mono text-color-text-muted mt-1 tracking-widest">{draft.draftId}</p>
+                        <h3 className="font-display text-lg text-color-text-primary">{draft.blNumber || 'UNNAMED_DRAFT'}</h3>
+                        <p className="text-[10px] font-mono text-color-text-muted mt-1 tracking-widest">{currentId}</p>
                      </div>
                      <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${status.bg} ${status.color} ${status.border}`}>
-                        <StatusIcon /> {draft.status}
+                        <StatusIcon /> {draft.status || 'draft'}
                      </span>
                   </div>
 
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between items-center text-xs">
                         <span className="text-color-text-muted font-bold uppercase tracking-tighter">Vessel Submission</span>
-                        <span className="font-mono text-portaccent">{draft.submissionId}</span>
+                        <span className="font-mono text-portaccent">{draft.submissionId || 'N/A'}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
                         <span className="text-color-text-muted font-bold uppercase tracking-tighter">Current Revision</span>
-                        <span className="bg-portmid/20 px-2 py-0.5 rounded text-color-text-primary font-bold">v{draft.version}</span>
+                        <span className="bg-portmid/20 px-2 py-0.5 rounded text-color-text-primary font-bold">v{draft.version || 1}</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
                         <span className="text-color-text-muted font-bold uppercase tracking-tighter">Drafted By</span>
-                        <span className="text-indigo-600 font-medium">@{(draft.createdBy || 'unknown').split('@')[0]}</span>
+                        <span className="text-indigo-600 font-medium">@{(draft.createdBy || 'system').split('@')[0]}</span>
                     </div>
                   </div>
 
                   <div className="flex gap-2">
                     <Link 
-                        href={`/ebl/drafts/${draft.draftId}`}
+                        href={`/ebl/drafts/${currentId}`}
                         className="flex-1 bg-portsurface text-portaccent border border-portmid/30 py-3 rounded-xl flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest hover:bg-portaccent hover:text-white transition-all group"
                     >
                         <FaUserEdit /> {draft.status === 'draft' ? 'Review & Revise' : 'View Details'}
@@ -89,7 +90,7 @@ export default function DraftList() {
                 </div>
                 
                 <div className="bg-portbase/50 px-6 py-2 border-t border-portmid/30 flex justify-between items-center italic">
-                   <p className="text-[8px] text-color-text-muted uppercase tracking-widest">Last Modified: {new Date(draft.updatedAt).toLocaleString()}</p>
+                   <p className="text-[8px] text-color-text-muted uppercase tracking-widest">Last Modified: {draft.updatedAt ? new Date(draft.updatedAt).toLocaleString() : 'Recently'}</p>
                 </div>
               </div>
             );

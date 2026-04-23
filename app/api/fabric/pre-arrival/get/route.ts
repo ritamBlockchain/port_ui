@@ -37,12 +37,21 @@ export async function GET(req: NextRequest) {
 
     // 3. Fetch Berth Assignment (Operational Join)
     try {
-      const berthResult = await evaluateTransaction('QueryAssets', `{"selector":{"submissionId":"${id}"}}`);
-      const berthArray = JSON.parse(berthResult.toString());
-      // Filter for the actual berth assignment object among potentially other assets sharing this sub ID
-      const berthRecord = berthArray.map((r: string) => JSON.parse(r)).find((asset: any) => asset.assignmentId);
-      if (berthRecord) {
-        data.berthAssignment = berthRecord;
+      // Use prefix query to fetch all berth assignments, then filter
+      const berthResult = await evaluateTransaction('QueryAssets', 'prefix:berth:');
+      const berthString = berthResult.toString();
+      if (berthString && berthString.trim() !== '') {
+        const berthArray = JSON.parse(berthString);
+        const berthRecord = berthArray
+          .map((r: string) => JSON.parse(r))
+          .find((asset: any) => asset.submissionId === id);
+        if (berthRecord) {
+          // For now, use default values if private data isn't accessible
+          // Private data collections require special handling in Fabric
+          if (!berthRecord.berthName) berthRecord.berthName = 'Assigned Berth';
+          if (!berthRecord.timeSlot) berthRecord.timeSlot = new Date().toISOString();
+          data.berthAssignment = berthRecord;
+        }
       }
     } catch (berthErr: any) {
       console.log('Berth fetch (non-critical):', berthErr.message);

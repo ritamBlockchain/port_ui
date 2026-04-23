@@ -10,12 +10,42 @@ export async function GET(req: NextRequest) {
       // List all drafts
       const result = await evaluateTransaction('QueryAssets', '{"selector":{"docType":"draftebl"}}');
       const raw = JSON.parse(result.toString());
-      const data = raw.map((item: string) => JSON.parse(item));
+      const data = raw.map((item: string) => {
+        const obj = JSON.parse(item);
+        // Normalize common Go-style casing to camelCase for the UI
+        return {
+          draftId: obj.DraftId || obj.draftId || obj.ID || obj.id,
+          eblId: obj.EblId || obj.eblId,
+          blNumber: obj.BlNumber || obj.blNumber,
+          submissionId: obj.SubmissionId || obj.submissionId,
+          status: obj.Status || obj.status,
+          version: obj.Version || obj.version,
+          revisions: obj.Revisions || obj.revisions || [],
+          createdBy: obj.CreatedBy || obj.createdBy,
+          createdAt: obj.CreatedAt || obj.createdAt,
+          updatedAt: obj.UpdatedAt || obj.updatedAt,
+          ...obj
+        };
+      });
       return NextResponse.json({ success: true, data });
     }
 
     const result = await evaluateTransaction('GetDraftEBL', id);
-    return NextResponse.json({ success: true, data: JSON.parse(result.toString()) });
+    const obj = JSON.parse(result.toString());
+    const data = {
+      draftId: obj.DraftId || obj.draftId || obj.ID || obj.id,
+      eblId: obj.EblId || obj.eblId,
+      blNumber: obj.BlNumber || obj.blNumber,
+      submissionId: obj.SubmissionId || obj.submissionId,
+      status: obj.Status || obj.status,
+      version: obj.Version || obj.version,
+      revisions: obj.Revisions || obj.revisions || [],
+      createdBy: obj.CreatedBy || obj.createdBy,
+      createdAt: obj.CreatedAt || obj.createdAt,
+      updatedAt: obj.UpdatedAt || obj.updatedAt,
+      ...obj
+    };
+    return NextResponse.json({ success: true, data });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }

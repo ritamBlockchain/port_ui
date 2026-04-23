@@ -16,13 +16,13 @@ export async function getContract(): Promise<Contract> {
     gateway = new Gateway();
     const gatewayOpts: GatewayOptions = {
       wallet,
-      identity: process.env.FABRIC_IDENTITY || 'admin',
+      identity: 'admin',
       discovery: { enabled: true, asLocalhost: true },
     };
 
     await gateway.connect(ccp, gatewayOpts);
-    network = await gateway.getNetwork(process.env.FABRIC_CHANNEL || 'mychannel');
-    contract = network.getContract(process.env.FABRIC_CHAINCODE || 'portchain');
+    network = await gateway.getNetwork('mychannel');
+    contract = network.getContract('portchain');
     console.log('✅ Fabric Gateway connected successfully');
     return contract;
   } catch (err) {

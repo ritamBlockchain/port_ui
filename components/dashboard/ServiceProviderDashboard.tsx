@@ -4,6 +4,7 @@ import { FaAnchor, FaShip, FaHistory, FaPlusCircle, FaPlayCircle, FaCheckCircle,
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/api/auth';
+import ServiceRequestManagement from '@/components/services/ServiceRequestManagement';
 
 export default function ServiceProviderDashboard() {
   const { role } = useAuth();
@@ -89,6 +90,9 @@ export default function ServiceProviderDashboard() {
            <FaPlusCircle /> Start New Log
         </Link>
       </div>
+
+      {/* Service Request Management */}
+      <ServiceRequestManagement />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Vessels in Port - Phase 4 */}

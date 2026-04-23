@@ -25,7 +25,18 @@ export default function DraftManagementPage() {
     }
   }, [draft]);
 
-  if (isLoading) return <div className="py-20 text-center animate-pulse font-display">Decrypting Draft Data...</div>;
+  if (isLoading) return <div className="py-20 text-center animate-pulse font-display text-portaccent">Decrypting Draft Data...</div>;
+  
+  if (isError || !draft) {
+    return (
+      <div className="py-20 text-center space-y-4">
+        <FaTimesCircle className="mx-auto text-4xl text-rose-500" />
+        <h2 className="text-xl font-display text-rose-600">Draft Not Found</h2>
+        <p className="text-sm text-color-text-secondary">This draft may have been issued or you lack permission to view it.</p>
+        <Link href="/ebl/drafts" className="inline-block port-btn-primary mt-4">Return to Drafts</Link>
+      </div>
+    );
+  }
 
   const handleAction = (action: string, extra: any = {}) => {
     performAction.mutate({ action, snapshot, ...extra });

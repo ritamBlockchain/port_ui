@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import { DM_Sans, DM_Serif_Display, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/api/auth';
-import Sidebar from '@/components/layout/Sidebar';
-import Header from '@/components/layout/Header';
 import { Toaster } from 'sonner';
+import QueryProvider from '@/lib/api/query-provider';
+import { SidebarProvider } from '@/lib/context/SidebarContext';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -27,8 +28,6 @@ export const metadata: Metadata = {
   description: 'Industrial-grade port blockchain platform',
 };
 
-import QueryProvider from '@/lib/api/query-provider';
-
 export default function RootLayout({
   children,
 }: {
@@ -39,14 +38,12 @@ export default function RootLayout({
       <body className={`${dmSans.variable} ${dmSerif.variable} ${jetbrainsMono.variable} font-sans`}>
         <QueryProvider>
           <AuthProvider>
-            <div className="flex bg-[#F7FBFC] min-h-screen">
-              <Sidebar />
-              <main className="flex-1 ml-64 p-8">
-                <Header />
+            <SidebarProvider>
+              <DashboardLayout>
                 {children}
-              </main>
-            </div>
-            <Toaster richColors position="top-right" />
+              </DashboardLayout>
+              <Toaster richColors position="top-right" />
+            </SidebarProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

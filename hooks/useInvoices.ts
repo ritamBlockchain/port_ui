@@ -16,7 +16,7 @@ export function useInvoices() {
   });
 
   const generateInvoiceMutation = useMutation({
-    mutationFn: async (data: { submissionId: string }) => {
+    mutationFn: async (data: any) => {
       const res = await fetch('/api/fabric/invoices/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -26,8 +26,11 @@ export function useInvoices() {
       if (!json.success) throw new Error(json.error);
       return json;
     },
-    onSuccess: () => {
-      toast.success('Service invoice generated on ledger');
+    onSuccess: (data: any) => {
+      toast.success(`Invoice ${data.invoiceId} successfully minted on Fabric!`, {
+        description: `TxID: ${data.txId.substring(0, 16)}...`,
+        duration: 5000,
+      });
       queryClient.invalidateQueries({ queryKey: ['invoices-list'] });
     },
     onError: (err: any) => {
@@ -36,11 +39,11 @@ export function useInvoices() {
   });
 
   const settleInvoiceMutation = useMutation({
-    mutationFn: async (invoiceId: string) => {
+    mutationFn: async ({ invoiceId, amountPaid }: { invoiceId: string, amountPaid: number }) => {
       const res = await fetch('/api/fabric/invoices/pay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ invoiceId }),
+        body: JSON.stringify({ invoiceId, amountPaid }),
       });
       const json = await res.json();
       if (!json.success) throw new Error(json.error);

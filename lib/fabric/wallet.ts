@@ -6,26 +6,24 @@ import * as path from 'path';
 export async function buildWallet() {
   const wallet = await Wallets.newInMemoryWallet();
 
-  const certPath = process.env.ADMIN_CERT_PATH!;
-  let keyPath  = process.env.ADMIN_KEY_PATH!;
+  // Hardcoded paths to fabric-samples
+  const certPath = '/Users/ritambiswas/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem';
+  const keystoreDir = '/Users/ritambiswas/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore';
+  let keyPath = path.join(keystoreDir, '9641b4306e80407be6a4bd8737d64396f519492a21ce3343db539e551929ead8_sk');
 
   // Auto-discover key file if the exact path doesn't exist
-  // Fabric CA generates keystore files with random hash names
-  if (keyPath && !fs.existsSync(keyPath)) {
-    const keystoreDir = path.dirname(keyPath);
-    if (fs.existsSync(keystoreDir)) {
-      const files = fs.readdirSync(keystoreDir).filter(f => f.endsWith('_sk'));
-      if (files.length > 0) {
-        keyPath = path.join(keystoreDir, files[0]);
-        console.log(`Auto-discovered keystore file: ${files[0]}`);
-      }
+  if (!fs.existsSync(keyPath) && fs.existsSync(keystoreDir)) {
+    const files = fs.readdirSync(keystoreDir).filter(f => f.endsWith('_sk'));
+    if (files.length > 0) {
+      keyPath = path.join(keystoreDir, files[0]);
+      console.log(`Auto-discovered keystore file: ${files[0]}`);
     }
   }
 
-  if (!certPath || !keyPath || !fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
+  if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
     console.error('FABRIC WALLET ERROR: Certificate or key file not found.');
-    console.error(`  CERT: ${certPath} -> ${certPath ? fs.existsSync(certPath) : 'NOT SET'}`);
-    console.error(`  KEY:  ${keyPath} -> ${keyPath ? fs.existsSync(keyPath) : 'NOT SET'}`);
+    console.error(`  CERT: ${certPath} -> ${fs.existsSync(certPath)}`);
+    console.error(`  KEY:  ${keyPath} -> ${fs.existsSync(keyPath)}`);
     return wallet;
   }
 
@@ -34,7 +32,7 @@ export async function buildWallet() {
 
   const identity: X509Identity = {
     credentials: { certificate, privateKey },
-    mspId: process.env.FABRIC_ORG || 'Org1MSP',
+    mspId: 'Org1MSP',
     type: 'X.509',
   };
 
@@ -44,8 +42,9 @@ export async function buildWallet() {
 }
 
 export function buildCCPOrg1() {
-  const ccpPath = process.env.CONNECTION_PROFILE_PATH!;
-  if (!ccpPath || !fs.existsSync(ccpPath)) {
+  // Hardcoded path to fabric-samples
+  const ccpPath = '/Users/ritambiswas/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.json';
+  if (!fs.existsSync(ccpPath)) {
     console.error(`Connection profile not found at: ${ccpPath}`);
     return {
       name: 'test-network',

@@ -17,7 +17,7 @@ export default function IssueCredentialPage() {
     entityType: 'ship',
     entityId: '',
     entityName: '',
-    credentialType: 'registration',
+    credentialType: 'IMOCertificate',
     issuingAuthority: 'Port Registrar',
     referenceNumber: `REF-${Date.now()}`,
     certificateHash: '',
@@ -26,6 +26,8 @@ export default function IssueCredentialPage() {
     verificationBaseURL: 'http://localhost:3000/verify',
     previousCredentialId: ''
   });
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isHashing, setIsHashing] = useState(false);
 
   const issueMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -47,6 +49,30 @@ export default function IssueCredentialPage() {
     }
   });
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadedFile(file);
+    setIsHashing(true);
+
+    try {
+      // Generate SHA-256 hash of the file
+      const arrayBuffer = await file.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      setFormData(prev => ({ ...prev, certificateHash: `0x${hashHex}` }));
+      toast.success('Document hash generated successfully');
+    } catch (error) {
+      toast.error('Failed to generate document hash');
+      console.error(error);
+    } finally {
+      setIsHashing(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -58,6 +84,12 @@ export default function IssueCredentialPage() {
     // Validate IMO for ship credentials
     if (formData.entityType === 'ship' && !formData.entityId.startsWith('IMO')) {
       toast.error('Ship credentials require a valid IMO number (format: IMO1234567)');
+      return;
+    }
+
+    // Require document upload
+    if (!formData.certificateHash) {
+      toast.error('Please upload a supporting document to generate the certificate hash');
       return;
     }
 
@@ -147,13 +179,16 @@ export default function IssueCredentialPage() {
             <div>
               <label className="text-[10px] font-bold uppercase tracking-widest text-color-text-muted block mb-1">Credential Type</label>
               <select name="credentialType" value={formData.credentialType} onChange={handleChange} className="port-input">
-                <option value="registration">Registration Certificate</option>
-                <option value="compliance">Compliance Certificate</option>
-                <option value="safety">Safety Certificate</option>
-                <option value="environmental">Environmental Certificate</option>
-                <option value="customs">Customs Clearance</option>
-                <option value="identity">Identity Certificate</option>
-                <option value="operational">Operational Certificate</option>
+                <option value="IMOCertificate">IMO Certificate</option>
+                <option value="SafetyManagement">Safety Management Certificate</option>
+                <option value="Insurance">Insurance Certificate</option>
+                <option value="LoadLineCertificate">Load Line Certificate</option>
+                <option value="MARPOLCertificate">MARPOL Certificate</option>
+                <option value="SOLASCertificate">SOLAS Certificate</option>
+                <option value="BusinessLicense">Business License</option>
+                <option value="TaxRegistration">Tax Registration</option>
+                <option value="ISMCodeDocument">ISM Code Document</option>
+                <option value="ISOCertificate">ISO Certificate</option>
               </select>
             </div>
             <div>
@@ -177,15 +212,37 @@ export default function IssueCredentialPage() {
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-widest text-color-text-muted block mb-1">Certificate Hash</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-color-text-muted block mb-1">Supporting Document (Required)</label>
+              <input
+                type="file"
+                onChange={handleFileUpload}
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                className="port-input"
+                disabled={isHashing}
+              />
+              {uploadedFile && (
+                <p className="text-[8px] text-emerald-600 mt-1 flex items-center gap-1">
+                  ✓ {uploadedFile.name} ({(uploadedFile.size / 1024).toFixed(2)} KB)
+                </p>
+              )}
+              {isHashing && (
+                <p className="text-[8px] text-portaccent mt-1">Generating SHA-256 hash...</p>
+              )}
+            </div>
+            <div>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-color-text-muted block mb-1">Certificate Hash (Auto-generated)</label>
               <input
                 type="text"
                 name="certificateHash"
                 value={formData.certificateHash}
                 onChange={handleChange}
-                placeholder="0x..."
-                className="port-input"
+                placeholder="Upload document to generate hash"
+                className="port-input bg-portsurface/50"
+                readOnly
               />
+              {formData.certificateHash && (
+                <p className="text-[8px] text-emerald-600 mt-1">✓ Hash generated from uploaded document</p>
+              )}
             </div>
             <div>
               <label className="text-[10px] font-bold uppercase tracking-widest text-color-text-muted block mb-1">Valid From</label>

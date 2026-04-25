@@ -13,12 +13,25 @@ export async function GET(req: NextRequest) {
     console.log(`Fetching audit log for credential ${credentialId}`);
     
     // Contract: GetCredentialAuditLog(ctx, credentialId)
-    const result = await evaluateTransaction('GetCredentialAuditLog', credentialId);
-    
-    return NextResponse.json({ 
-      success: true, 
-      data: JSON.parse(result.toString()) 
-    });
+    // Note: This may fail on LevelDB (CouchDB query), return empty array in that case
+    try {
+      const result = await evaluateTransaction('GetCredentialAuditLog', credentialId);
+      return NextResponse.json({ 
+        success: true, 
+        data: JSON.parse(result.toString()) 
+      });
+    } catch (queryError: any) {
+      // If query fails (e.g., LevelDB doesn't support rich queries), return empty array
+      if (queryError.message?.includes('ExecuteQuery not supported') || 
+          queryError.message?.includes('GET_QUERY_RESULT failed')) {
+        console.log('Audit log query not supported (LevelDB), returning empty array');
+        return NextResponse.json({ 
+          success: true, 
+          data: [] 
+        });
+      }
+      throw queryError;
+    }
   } catch (error: any) {
     console.error('Fabric GetCredentialAuditLog error:', error);
     return NextResponse.json({ 

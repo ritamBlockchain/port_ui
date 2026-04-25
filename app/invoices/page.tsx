@@ -361,7 +361,7 @@ export default function InvoicesPage() {
                     {inv.dueDate && inv.dueDate !== 'N/A' ? new Date(inv.dueDate).toLocaleDateString() : 'N/A'}
                   </p>
                 </div>
-                {inv.status !== 'paid' && role === 'shippingagent' && (
+                {inv.status !== 'paid' && role === 'portauthority' && (
                   <button
                     onClick={() => handleSettle(inv)}
                     disabled={isSettling}

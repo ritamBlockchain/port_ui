@@ -4,8 +4,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useRouter } from 'next/navigation';
 import { FaShieldAlt, FaCalendarCheck, FaUserCheck, FaIdCard, FaQrcode, FaSync, FaExclamationCircle, FaCheckCircle, FaAward, FaEdit, FaBan } from 'react-icons/fa';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import QRCode from 'qrcode';
 
 
 const formatDate = (dateStr: string) => {
@@ -20,6 +21,17 @@ export default function CredentialDetailPage() {
   const queryClient = useQueryClient();
   const [isRevoking, setIsRevoking] = useState(false);
   const [reason, setReason] = useState('Regulatory non-compliance');
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationResult, setVerificationResult] = useState<any>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const verifyButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Debug: Check if button is mounted
+  useEffect(() => {
+    console.log('Component mounted, credentialId:', credentialId);
+    console.log('Verify button ref:', verifyButtonRef.current);
+  }, [credentialId]);
 
   const { data: credential, isLoading, isError, refetch } = useQuery({
     queryKey: ['credential', credentialId],
@@ -73,6 +85,89 @@ export default function CredentialDetailPage() {
     }
   });
 
+  // Generate QR code when credential is loaded
+  useEffect(() => {
+    if (credential) {
+      const generateQR = async () => {
+        try {
+          // Get the credential ID - try different possible field names
+          const credId = credential.credentialId || credential.id || credential.credential_id;
+          if (!credId) {
+            console.error('No credential ID found in credential data:', credential);
+            return;
+          }
+          
+          // Use actual IP address for mobile scanning instead of localhost
+          const baseUrl = 'http://192.168.1.18:3000';
+          const verifyUrl = `${baseUrl}/verify?id=${credId}`;
+          console.log('Generating QR for URL:', verifyUrl);
+          
+          const url = await QRCode.toDataURL(verifyUrl, {
+            width: 512,
+            margin: 2,
+            color: {
+              dark: '#000000',
+              light: '#ffffff'
+            },
+            errorCorrectionLevel: 'M'
+          });
+          console.log('QR Code generated successfully, length:', url.length);
+          setQrCodeUrl(url);
+        } catch (err) {
+          console.error('QR generation error:', err);
+          setQrCodeUrl('');
+        }
+      };
+      generateQR();
+    }
+  }, [credential]);
+
+  const handleVerify = async () => {
+    console.log('=== VERIFY CALLED ===');
+    console.log('credentialId from params:', credentialId);
+    console.log('credential data:', credential);
+    
+    const idToUse = credentialId || credential?.credentialId || credential?.id;
+    console.log('ID to use for verification:', idToUse);
+    
+    if (!idToUse) {
+      console.error('No credential ID available');
+      toast.error('No credential ID available');
+      return;
+    }
+    
+    setIsVerifying(true);
+    try {
+      console.log('Sending verification request for:', idToUse);
+      const res = await fetch('/api/fabric/credentials/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          credentialId: idToUse.toString(), 
+          certificateHash: credential?.certificateHash || '' 
+        })
+      });
+      console.log('Verification response status:', res.status);
+      const json = await res.json();
+      console.log('Verification response:', json);
+      if (json.success) {
+        setVerificationResult(json.data);
+        toast.success('Credential verified successfully');
+        // Refetch verification log to show the new entry
+        queryClient.invalidateQueries({ queryKey: ['credential-verification', credentialId] });
+      } else {
+        setVerificationResult({ status: 'error', error: json.error });
+        toast.error(json.error);
+      }
+    } catch (error: any) {
+      console.error('Verification error:', error);
+      setVerificationResult({ status: 'error', error: 'Verification failed' });
+      toast.error('Verification failed');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="py-20 flex flex-col items-center gap-4 text-portaccent">
@@ -100,9 +195,22 @@ export default function CredentialDetailPage() {
           <h1 className="text-3xl font-display">Verifiable Credential</h1>
           <p className="text-color-text-secondary">W3C Compliant Cryptographic Certificate</p>
         </div>
-        <Link href="/credentials" className="text-xs font-bold uppercase tracking-widest text-portaccent hover:underline">
-          ← Back to Registry
-        </Link>
+        <div className="flex gap-2">
+          <button
+            onClick={handleVerify}
+            disabled={isVerifying}
+            className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-xs uppercase"
+          >
+            {isVerifying ? <FaSync className="animate-spin" /> : <FaCheckCircle />}
+            {isVerifying ? 'Verifying...' : 'Verify'}
+          </button>
+          <Link href="/verify" className="text-xs font-bold uppercase tracking-widest text-portaccent hover:underline">
+            Scan QR Code
+          </Link>
+          <Link href="/credentials" className="text-xs font-bold uppercase tracking-widest text-portaccent hover:underline">
+            ← Back to Registry
+          </Link>
+        </div>
       </div>
 
       {/* The Certificate UI */}
@@ -145,18 +253,46 @@ export default function CredentialDetailPage() {
                   {credential.credentialId}
                 </p>
               </div>
+
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-color-text-muted block mb-2">Document Hash (SHA-256)</label>
+                <p className="text-xs font-mono break-all bg-emerald-50 p-2 rounded border border-emerald-200 text-emerald-800">
+                  {credential.certificateHash}
+                </p>
+                <p className="text-[8px] text-emerald-600 mt-1 italic">Cryptographic proof of supporting document</p>
+              </div>
             </div>
 
             <div className="space-y-6 bg-portsurface/30 p-6 rounded-xl border border-portmid/50 flex flex-col items-center justify-center">
-                <div className="w-32 h-32 bg-white p-2 border-2 border-portmid rounded-lg flex items-center justify-center relative group">
-                    <FaQrcode className="text-7xl text-color-text-primary opacity-20 group-hover:opacity-100 transition-opacity" />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="bg-portaccent text-white text-[8px] px-2 py-1 rounded font-bold uppercase">Scan to Verify</span>
-                    </div>
+                <div className="w-56 h-56 bg-white p-4 border-4 border-portaccent rounded-lg flex items-center justify-center relative shadow-xl">
+                    {qrCodeUrl ? (
+                        <img 
+                            src={qrCodeUrl} 
+                            alt="QR Code" 
+                            className="w-full h-full object-contain"
+                            style={{ imageRendering: 'crisp-edges' }}
+                        />
+                    ) : (
+                        <div className="text-center">
+                            <FaQrcode className="text-8xl text-portmid animate-pulse mx-auto mb-2" />
+                            <p className="text-xs text-portmid">Generating QR...</p>
+                        </div>
+                    )}
                 </div>
-                <p className="text-[8px] text-center text-color-text-muted font-mono leading-tight">
-                    Proof: {credential.certificateHash.substring(0, 32)}...
-                </p>
+                <div className="text-center space-y-1">
+                    <p className="text-[10px] text-color-text-muted font-mono leading-tight">
+                        Credential ID:
+                    </p>
+                    <p className="text-xs font-bold text-portaccent font-mono break-all">
+                        {credential.credentialId || credential.id || credential.credential_id || credentialId}
+                    </p>
+                    <p className="text-[8px] text-color-text-muted italic">
+                        Scan to verify authenticity
+                    </p>
+                </div>
+                {!qrCodeUrl && (
+                    <p className="text-[8px] text-rose-500">QR Code not generating - check console</p>
+                )}
             </div>
           </div>
 
@@ -209,6 +345,16 @@ export default function CredentialDetailPage() {
         </div>
       ) : (
         <div className="flex gap-4">
+            <button 
+                type="button"
+                onClick={handleVerify}
+                disabled={isVerifying}
+                className="flex-1 bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ position: 'relative', zIndex: 100 }}
+            >
+                {isVerifying ? <FaSync className="animate-spin" /> : <FaCheckCircle />}
+                {isVerifying ? 'Verifying...' : 'Verify Credential'}
+            </button>
             <button className="flex-1 port-btn-secondary py-3 flex items-center justify-center gap-2">
                 <FaFileSync /> Download PDF Copy
             </button>
@@ -220,6 +366,40 @@ export default function CredentialDetailPage() {
                     <FaShieldAlt /> Revoke Credential
                 </button>
             )}
+        </div>
+      )}
+
+      {verificationResult && (
+        <div className={`port-card p-6 border-2 ${
+          verificationResult.status === 'active' || verificationResult.status === 'issued' || verificationResult.isValid === true 
+            ? 'bg-emerald-50 border-emerald-200' 
+            : 'bg-rose-50 border-rose-200'
+        }`}>
+          <div className="flex items-center gap-3 mb-2">
+            {verificationResult.status === 'active' || verificationResult.status === 'issued' || verificationResult.isValid === true ? (
+              <FaCheckCircle className="text-2xl text-emerald-600" />
+            ) : (
+              <FaExclamationCircle className="text-2xl text-rose-600" />
+            )}
+            <h4 className="font-display text-lg">
+              {verificationResult.status === 'active' || verificationResult.status === 'issued' || verificationResult.isValid === true 
+                ? 'Credential is Valid' 
+                : 'Credential is Invalid'}
+            </h4>
+          </div>
+          <p className="text-sm text-color-text-secondary">
+            This credential has been verified on the blockchain ledger.
+          </p>
+          {verificationResult.verifyNotes && verificationResult.verifyNotes.length > 0 && (
+            <div className="mt-3 text-xs">
+              <p className="font-bold uppercase tracking-widest mb-1">Verification Notes:</p>
+              <ul className="list-disc list-inside space-y-1">
+                {verificationResult.verifyNotes.map((note: string, idx: number) => (
+                  <li key={idx} className="text-color-text-secondary">{note}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
 

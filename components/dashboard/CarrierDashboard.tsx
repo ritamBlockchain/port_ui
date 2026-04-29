@@ -39,11 +39,7 @@ export default function CarrierDashboard() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-xl font-display font-bold mb-1">Carrier EBL Journey</h3>
-            <p className="text-sm opacity-80">Instant transfer vs 5-7 days for paper, 60% reduction in document handling costs</p>
-          </div>
-          <div className="bg-portaccent/20 px-4 py-2 rounded-xl border border-portaccent/30">
-            <p className="text-2xl font-display font-bold text-portaccent">60%</p>
-            <p className="text-[10px] uppercase tracking-widest text-portaccent">Cost Reduction</p>
+            <p className="text-sm opacity-80">Secure, immutable management of electronic Bill of Lading titles on the distributed ledger.</p>
           </div>
         </div>
         <div className="flex items-center justify-between gap-2">

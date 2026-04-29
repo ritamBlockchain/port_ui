@@ -45,7 +45,7 @@ export default function RoleSwitcher({ isCollapsed }: RoleSwitcherProps) {
       )}
       
       <div className={cn(
-        "grid grid-cols-1 gap-1 overflow-y-auto custom-scrollbar pr-1",
+        "grid grid-cols-1 gap-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pr-1",
         isCollapsed ? "max-h-[300px]" : "max-h-[240px]"
       )}>
         {Object.entries(roleConfig).map(([r, config]) => {
@@ -77,7 +77,7 @@ export default function RoleSwitcher({ isCollapsed }: RoleSwitcherProps) {
               )}
               
               {isActive && !isCollapsed && (
-                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-portaccent animate-pulse" />
+                <div className="ml-auto w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
               )}
               
               {isCollapsed && isActive && (

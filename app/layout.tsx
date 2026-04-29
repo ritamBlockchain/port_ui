@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { DM_Sans, DM_Serif_Display, JetBrains_Mono } from 'next/font/google';
+import { Roboto, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/api/auth';
 import { Toaster } from 'sonner';
@@ -7,15 +7,10 @@ import QueryProvider from '@/lib/api/query-provider';
 import { SidebarProvider } from '@/lib/context/SidebarContext';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 
-const dmSans = DM_Sans({
+const roboto = Roboto({
+  weight: ['300', '400', '500', '700', '900'],
   subsets: ['latin'],
   variable: '--font-sans',
-});
-
-const dmSerif = DM_Serif_Display({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-display',
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -35,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${dmSans.variable} ${dmSerif.variable} ${jetbrainsMono.variable} font-sans`}>
+      <body className={`${roboto.variable} ${jetbrainsMono.variable} font-sans`}>
         <QueryProvider>
           <AuthProvider>
             <SidebarProvider>

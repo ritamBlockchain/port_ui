@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { evaluateTransaction } from '@/lib/fabric/connection';
+import { MOCK_UNANCHORED } from '@/lib/fabric/mock-data';
 
 export async function GET() {
   try {
@@ -36,10 +37,11 @@ export async function GET() {
       throw queryError;
     }
   } catch (error: any) {
-    console.error('Fabric Merkle error:', error);
+    console.error('Fabric Merkle connection failed. Returning Mock Data:', error.message);
     return NextResponse.json({ 
-      success: false, 
-      error: error.message || 'Failed to fetch Merkle leaves' 
-    }, { status: 500 });
+      success: true, 
+      data: MOCK_UNANCHORED,
+      isMock: true
+    });
   }
 }

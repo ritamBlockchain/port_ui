@@ -61,11 +61,7 @@ export default function RegulatoryDashboard() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-xl font-display font-bold mb-1">{config.label} Journey</h3>
-            <p className="text-sm opacity-80">80% faster processing with automated validation on blockchain</p>
-          </div>
-          <div className="bg-portaccent/20 px-4 py-2 rounded-xl border border-portaccent/30">
-            <p className="text-2xl font-display font-bold text-portaccent">80%</p>
-            <p className="text-[10px] uppercase tracking-widest text-portaccent">Faster Processing</p>
+            <p className="text-sm opacity-80">Accelerated cross-agency validation through automated compliance on the blockchain.</p>
           </div>
         </div>
         <div className="flex items-center justify-between gap-2">

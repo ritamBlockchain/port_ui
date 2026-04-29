@@ -19,18 +19,18 @@ export default function EBLPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-display">Electronic Bills of Lading</h1>
-          <p className="text-color-text-secondary">Direct ledger settlement for maritime title documents</p>
+          <h1 className="text-2xl sm:text-3xl font-display leading-tight">Electronic Bills of Lading</h1>
+          <p className="text-color-text-secondary text-sm sm:text-base">Direct ledger settlement for maritime title documents</p>
         </div>
-        <div className="flex gap-2">
-            <button onClick={() => refetch()} className="p-2 border border-portmid rounded-lg text-portaccent">
+        <div className="flex items-center gap-2">
+            <button onClick={() => refetch()} className="p-2.5 border border-portmid rounded-xl text-portaccent hover:bg-portbase transition-colors flex-shrink-0">
                 <FaSync className={isLoading ? 'animate-spin' : ''} />
             </button>
             {['carrier', 'admin'].includes(role) && (
-            <Link href="/ebl/draft" className="port-btn-primary flex items-center gap-2">
-                <FaFileInvoice /> Issue New eBL
+            <Link href="/ebl/draft" className="port-btn-primary flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5">
+                <FaFileInvoice /> <span className="whitespace-nowrap">Issue New eBL</span>
             </Link>
             )}
         </div>

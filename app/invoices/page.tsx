@@ -94,21 +94,21 @@ export default function InvoicesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-display text-color-text-primary uppercase tracking-tight">Financial Settlement</h1>
-          <p className="text-color-text-secondary">Consolidated port service invoices and ledger-based payments</p>
+          <h1 className="text-2xl sm:text-3xl font-display text-color-text-primary uppercase tracking-tight leading-tight">Financial Settlement</h1>
+          <p className="text-color-text-secondary text-sm sm:text-base">Consolidated port service invoices and ledger-based payments</p>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => refetch()} className="p-2 border border-portmid rounded-lg text-portaccent hover:bg-portbase">
+        <div className="flex items-center gap-2">
+          <button onClick={() => refetch()} className="p-2.5 border border-portmid rounded-xl text-portaccent hover:bg-portbase transition-colors flex-shrink-0">
             <FaSync className={isLoading ? 'animate-spin' : ''} />
           </button>
           {['portauthority', 'admin'].includes(role) && (
             <button
               onClick={() => setShowGenerate(!showGenerate)}
-              className="port-btn-primary flex items-center gap-2"
+              className="port-btn-primary flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5"
             >
-              {showGenerate ? 'Cancel' : <><FaPlus /> New Service Invoice</>}
+              {showGenerate ? 'Cancel' : <><FaPlus /> <span className="whitespace-nowrap">New Service Invoice</span></>}
             </button>
           )}
         </div>

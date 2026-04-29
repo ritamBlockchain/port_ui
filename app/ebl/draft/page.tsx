@@ -241,7 +241,7 @@ export default function IssueEBLPage() {
           </div>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <button 
             type="submit" 
             disabled={issue.isPending || !canIssueEBL}
@@ -253,7 +253,7 @@ export default function IssueEBLPage() {
           <button 
             type="button" 
             onClick={() => router.push('/ebl')}
-            className="px-8 py-4 border-2 border-portmid text-color-text-secondary font-bold rounded-xl hover:bg-portbase transition-all text-xs uppercase tracking-widest"
+            className="w-full sm:w-auto px-8 py-4 border-2 border-portmid text-color-text-secondary font-bold rounded-xl hover:bg-portbase transition-all text-xs uppercase tracking-widest"
           >
             Cancel
           </button>

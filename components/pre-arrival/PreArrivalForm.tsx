@@ -216,12 +216,18 @@ export default function PreArrivalForm() {
         </div>
       )}
 
-      <div className="flex justify-end gap-4 pt-4">
-        <button type="button" onClick={() => router.back()} className="px-8 py-3 rounded-xl border border-portmid font-bold text-color-text-secondary hover:bg-portbase transition-all uppercase tracking-widest text-xs">Cancel</button>
+      <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-4">
+        <button 
+          type="button" 
+          onClick={() => router.back()} 
+          className="w-full sm:w-auto px-8 py-3 rounded-xl border border-portmid font-bold text-color-text-secondary hover:bg-portbase transition-all uppercase tracking-widest text-xs"
+        >
+          Cancel
+        </button>
         <button 
             type="submit" 
             disabled={isSubmitting}
-            className="px-12 py-3 rounded-xl bg-portaccent text-white font-bold flex items-center gap-3 shadow-lg hover:shadow-portaccent/20 transition-all active:scale-95 disabled:opacity-50 uppercase tracking-widest text-xs"
+            className="w-full sm:w-auto px-12 py-3 rounded-xl bg-portaccent text-white font-bold flex items-center justify-center gap-3 shadow-lg hover:shadow-portaccent/20 transition-all active:scale-95 disabled:opacity-50 uppercase tracking-widest text-xs"
         >
           {isSubmitting ? 'Processing Transaction...' : 'Broadcast to Ledger'} <FaCheckCircle />
         </button>

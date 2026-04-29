@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { evaluateTransaction } from '@/lib/fabric/connection';
+import { MOCK_EBLS } from '@/lib/fabric/mock-data';
 
 export async function GET(req: NextRequest) {
   try {
@@ -49,7 +50,11 @@ export async function GET(req: NextRequest) {
     };
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
-    console.error('Fabric EBL error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    console.error('Fabric EBL connection failed. Returning Mock Data:', error.message);
+    return NextResponse.json({ 
+      success: true, 
+      data: MOCK_EBLS,
+      isMock: true
+    });
   }
 }

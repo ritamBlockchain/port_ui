@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { evaluateTransaction } from '@/lib/fabric/connection';
+import { MOCK_SERVICES } from '@/lib/fabric/mock-data';
 
 export async function GET() {
   try {
@@ -56,11 +57,12 @@ export async function GET() {
 
     return NextResponse.json({ success: true, data: allData });
   } catch (error: any) {
-    console.error('Fabric Service Data Fetch Failed:', error.message);
+    console.error('Fabric Service Data Fetch Failed. Returning Mock Data:', error.message);
     return NextResponse.json({ 
-      success: false, 
-      error: error.message || 'Failed to fetch live service data'
-    }, { status: 500 });
+      success: true, 
+      data: MOCK_SERVICES,
+      isMock: true
+    });
   }
 }
 

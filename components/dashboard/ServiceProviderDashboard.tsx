@@ -53,11 +53,7 @@ export default function ServiceProviderDashboard() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-xl font-display font-bold mb-1">Service Provider Journey</h3>
-            <p className="text-sm opacity-80">Revenue cycle reduced from 30 days to 7 days with blockchain automation</p>
-          </div>
-          <div className="bg-portaccent/20 px-4 py-2 rounded-xl border border-portaccent/30">
-            <p className="text-2xl font-display font-bold text-portaccent">7 Days</p>
-            <p className="text-[10px] uppercase tracking-widest text-portaccent">Revenue Cycle</p>
+            <p className="text-sm opacity-80">Accelerated revenue recognition through real-time service logging and automated invoicing.</p>
           </div>
         </div>
         <div className="flex items-center justify-between gap-2">

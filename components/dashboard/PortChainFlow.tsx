@@ -1,34 +1,46 @@
 'use client';
 
-import { FaShip, FaGavel, FaBuilding, FaAnchor, FaFileInvoice, FaFileContract, FaCertificate, FaCheckCircle, FaArrowRight, FaArrowDown, FaClock, FaShieldAlt } from 'react-icons/fa';
+import { FaShip, FaGavel, FaBuilding, FaAnchor, FaFileInvoice, FaFileContract, FaCertificate, FaArrowRight, FaClock, FaChevronDown, FaCheckCircle, FaNetworkWired, FaShieldAlt } from 'react-icons/fa';
 import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useRef } from 'react';
 
+/* ─── Types ─────────────────────────────────────────────── */
 interface PhaseData {
   id: number;
   title: string;
   subtitle: string;
   icon: any;
-  color: string;
+  accent: string;
+  glow: string;
+  border: string;
+  tag: string;
   benefits: string[];
   steps: string[];
 }
 
+/* ─── Phase Data ─────────────────────────────────────────── */
 const phases: PhaseData[] = [
   {
     id: 1,
     title: 'Pre-Arrival Notification',
-    subtitle: '2-7 Days Before Arrival',
+    subtitle: '2–7 Days Before Arrival',
     icon: FaShip,
-    color: 'bg-blue-500',
+    tag: 'INITIATION',
+    accent: '#0284c7',
+    glow: 'rgba(2,132,199,0.08)',
+    border: 'rgba(2,132,199,0.2)',
     benefits: ['70% faster than manual submission', 'Real-time status tracking', 'Private cargo data encrypted'],
     steps: ['Submit vessel details', 'Upload cargo manifest', 'Provide crew list', 'Automated compliance check']
   },
   {
     id: 2,
     title: 'Multi-Agency Approval',
-    subtitle: '1-3 Days',
+    subtitle: '1–3 Days',
     icon: FaGavel,
-    color: 'bg-purple-500',
+    tag: 'REVIEW',
+    accent: '#7c3aed',
+    glow: 'rgba(124,58,237,0.08)',
+    border: 'rgba(124,58,237,0.2)',
     benefits: ['Single submission replaces multiple forms', 'Immutable approval history', 'Parallel agency review'],
     steps: ['Customs review', 'Immigration review', 'Port Health review', 'All 3 required for approval']
   },
@@ -37,35 +49,47 @@ const phases: PhaseData[] = [
     title: 'Berth Assignment',
     subtitle: 'Upon Approval',
     icon: FaBuilding,
-    color: 'bg-indigo-500',
+    tag: 'ASSIGNMENT',
+    accent: '#4f46e5',
+    glow: 'rgba(79,70,229,0.08)',
+    border: 'rgba(79,70,229,0.2)',
     benefits: ['Data-driven berth assignment', 'Transparent assignment history', 'Sensitive operational data protected'],
-    steps: ['Select berth based on vessel size', 'Set time slot', 'Assign pilotage requirements', 'Confirm assignment']
+    steps: ['Select berth by vessel size', 'Set time slot', 'Assign pilotage', 'Confirm assignment']
   },
   {
     id: 4,
-    title: 'Port Service Request & Execution',
+    title: 'Port Service Execution',
     subtitle: 'Day of Arrival',
     icon: FaAnchor,
-    color: 'bg-amber-500',
+    tag: 'EXECUTION',
+    accent: '#d97706',
+    glow: 'rgba(217,119,6,0.08)',
+    border: 'rgba(217,119,6,0.2)',
     benefits: ['Real-time service status updates', 'Built-in dispute mechanism', 'Automated invoicing trigger'],
     steps: ['Request services (pilotage, tug, etc.)', 'Provider accepts request', 'Service started & logged', 'Service completed']
   },
   {
     id: 5,
-    title: 'Automated Invoicing & Settlement',
+    title: 'Invoicing & Settlement',
     subtitle: 'Post-Service',
     icon: FaFileInvoice,
-    color: 'bg-emerald-500',
+    tag: 'SETTLEMENT',
+    accent: '#059669',
+    glow: 'rgba(5,150,105,0.08)',
+    border: 'rgba(5,150,105,0.2)',
     benefits: ['90% reduction in manual processing', 'Eliminates calculation errors', 'Complete payment audit trail'],
     steps: ['Generate invoice from service logs', 'Apply rates & discounts', 'Calculate tax', 'Confirm payment']
   },
   {
     id: 6,
     title: 'Electronic Bill of Lading',
-    subtitle: 'Optional - For Cargo',
+    subtitle: 'Optional — For Cargo',
     icon: FaFileContract,
-    color: 'bg-rose-500',
-    benefits: ['Paperless bill of lading', 'Instant transfer vs 5-7 days', 'Immutable ownership chain'],
+    tag: 'DOCUMENTATION',
+    accent: '#e11d48',
+    glow: 'rgba(225,29,72,0.08)',
+    border: 'rgba(225,29,72,0.2)',
+    benefits: ['Paperless bill of lading', 'Instant transfer vs 5–7 days', 'Immutable ownership chain'],
     steps: ['Create draft EBL', 'Collaborative revision', 'Commit & issue EBL', 'Transfer to consignee']
   },
   {
@@ -73,11 +97,180 @@ const phases: PhaseData[] = [
     title: 'Digital Credentials',
     subtitle: 'For Vessels & Companies',
     icon: FaCertificate,
-    color: 'bg-cyan-500',
+    tag: 'VERIFICATION',
+    accent: '#0891b2',
+    glow: 'rgba(8,145,178,0.08)',
+    border: 'rgba(8,145,178,0.2)',
     benefits: ['Cryptographically verifiable', 'Instant verification', 'Automated expiry tracking'],
     steps: ['Issue credentials (IMO, Safety, etc.)', 'Generate QR code', 'Verify via QR scan', 'Track expiry & revocation']
   }
 ];
+
+
+
+/* ─── Components ─────────────────────────────────────────── */
+
+function AnimatedNumber({ value }: { value: string }) {
+  const [display, setDisplay] = useState('0%');
+  const ref = useRef<HTMLSpanElement>(null);
+  const animated = useRef(false);
+
+  useEffect(() => {
+    const num = parseInt(value);
+    const suffix = value.replace(/\d/g, '');
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !animated.current) {
+        animated.current = true;
+        let start = 0;
+        const dur = 1500;
+        const startTime = performance.now();
+        const tick = (now: number) => {
+          const p = Math.min((now - startTime) / dur, 1);
+          const eased = p === 1 ? 1 : 1 - Math.pow(2, -10 * p); // Exponential ease out
+          setDisplay(`${Math.floor(eased * num)}${suffix}`);
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+    });
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [value]);
+
+  return <span ref={ref}>{display}</span>;
+}
+
+function PhaseCard({ phase, index, active, completed }: { phase: PhaseData; index: number; active: number; completed: number }) {
+  const [expanded, setExpanded] = useState(false);
+  const Icon = phase.icon;
+
+  return (
+    <div className="relative flex gap-6 group">
+      {/* Timeline Column */}
+      <div className="flex flex-col items-center flex-shrink-0 w-12">
+        <div
+          className="z-10 flex items-center justify-center transition-all duration-500 border-2 rounded-full"
+          style={{
+            width: 48, height: 48,
+            borderColor: expanded ? phase.accent : '#e2e8f0',
+            background: expanded ? phase.glow : '#ffffff',
+            boxShadow: expanded ? `0 0 15px ${phase.glow}` : 'none'
+          }}
+        >
+          <Icon style={{ fontSize: 18, color: expanded ? phase.accent : '#94a3b8' }} />
+        </div>
+        {index < phases.length - 1 && (
+          <div
+            className="w-0.5 flex-1 transition-colors duration-500"
+            style={{
+              background: `linear-gradient(to bottom, ${expanded ? phase.accent : '#e2e8f0'}, #f8fafc)`
+            }}
+          />
+        )}
+      </div>
+
+      {/* Content Column */}
+      <div className="flex-1 pb-6">
+        <div
+          className="transition-all duration-300 border cursor-pointer rounded-xl bg-white border-slate-200 hover:border-slate-300 hover:shadow-lg"
+          style={{
+            boxShadow: expanded ? `0 10px 40px -10px rgba(0,0,0,0.05)` : 'none',
+          }}
+          onClick={() => setExpanded(!expanded)}
+        >
+          {/* Header Row */}
+          <div className="flex items-center gap-4 p-5">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-1">
+                <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                  Phase 0{phase.id}
+                </span>
+                <span
+                  className="px-2 py-0.5 rounded text-[9px] font-bold border"
+                  style={{ color: phase.accent, borderColor: phase.border, background: phase.glow }}
+                >
+                  {phase.tag}
+                </span>
+              </div>
+              <h3 className="text-lg font-bold tracking-tight text-slate-900 font-roboto">
+                {phase.title}
+              </h3>
+              <p className="flex items-center gap-1.5 mt-1 text-xs text-slate-500">
+                <FaClock className="text-[10px]" /> {phase.subtitle}
+              </p>
+            </div>
+
+            {/* Stats Badge */}
+            <div className="flex items-center gap-6 pr-4">
+              <div className="text-right">
+                <p className="text-xl font-black leading-none font-roboto" style={{ color: phase.accent }}>{active}</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">Pending</p>
+              </div>
+              <div className="w-px h-8 bg-slate-100" />
+              <div className="text-right">
+                <p className="text-xl font-black leading-none text-emerald-600 font-roboto">{completed}</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">Settled</p>
+              </div>
+              <FaChevronDown
+                className={`text-slate-400 transition-transform duration-300 ${expanded ? 'rotate-180' : ''}`}
+                style={{ fontSize: 12 }}
+              />
+            </div>
+          </div>
+
+          {/* Expanded Content */}
+          <div
+            className="overflow-hidden transition-all duration-500 ease-in-out"
+            style={{ maxHeight: expanded ? 400 : 0 }}
+          >
+            <div className="p-5 pt-0 border-t border-slate-100 bg-slate-50/30">
+              <div className="grid grid-cols-2 gap-8 mt-5">
+                {/* Benefits */}
+                <div>
+                  <h4 className="flex items-center gap-2 mb-3 text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+                    <FaShieldAlt className="text-slate-400" /> Strategic Impact
+                  </h4>
+                  <ul className="space-y-2">
+                    {phase.benefits.map((b, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs leading-relaxed text-slate-600">
+                        <div className="w-1.5 h-1.5 mt-1.5 rounded-full" style={{ background: phase.accent }} />
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Steps */}
+                <div>
+                  <h4 className="flex items-center gap-2 mb-3 text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+                    <FaNetworkWired className="text-slate-400" /> Ledger Workflow
+                  </h4>
+                  <div className="space-y-3">
+                    {phase.steps.map((step, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-5 h-5 text-[9px] font-bold border rounded-full border-slate-200 text-slate-500">
+                          0{i + 1}
+                        </div>
+                        <span className="text-xs text-slate-500">{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Verification Footer */}
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100 text-[9px] font-medium text-slate-400 italic">
+                <span className="flex items-center gap-1">
+                  <FaCheckCircle className="text-emerald-500" /> Cryptographically secured via PortChain Protocol
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function PortChainFlow() {
   const { data: submissions } = useQuery({
@@ -88,7 +281,6 @@ export default function PortChainFlow() {
       return json.success ? json.data || [] : [];
     }
   });
-
   const { data: serviceLogs } = useQuery({
     queryKey: ['flow-services'],
     queryFn: async () => {
@@ -97,7 +289,6 @@ export default function PortChainFlow() {
       return json.success ? json.data || [] : [];
     }
   });
-
   const { data: invoices } = useQuery({
     queryKey: ['flow-invoices'],
     queryFn: async () => {
@@ -106,7 +297,6 @@ export default function PortChainFlow() {
       return json.success ? json.data || [] : [];
     }
   });
-
   const { data: ebls } = useQuery({
     queryKey: ['flow-ebls'],
     queryFn: async () => {
@@ -116,176 +306,111 @@ export default function PortChainFlow() {
     }
   });
 
-  // Calculate phase status
   const getPhaseStatus = (phaseId: number) => {
     switch (phaseId) {
-      case 1: {
-        // Active: Just submitted, awaiting automated compliance
-        const active = submissions?.filter((s: any) => ['pending', 'submitted'].includes(s.status?.toLowerCase())).length || 0;
-        // Completed: Passed compliance or further along the flow
-        const completed = submissions?.filter((s: any) => !['pending', 'submitted'].includes(s.status?.toLowerCase())).length || 0;
-        return { active, completed };
-      }
-      case 2: {
-        // Active: Compliant but not yet fully approved
-        const active = submissions?.filter((s: any) => s.status?.toLowerCase() === 'compliant').length || 0;
-        // Completed: Fully approved or further
-        const completed = submissions?.filter((s: any) => s.status?.toLowerCase() === 'approved').length || 0;
-        return { active, completed };
-      }
-      case 3: {
-        // Active: Approved but no berth assigned yet
-        const active = submissions?.filter((s: any) => s.status?.toLowerCase() === 'approved' && !s.berthId).length || 0;
-        // Completed: Berth assigned
-        const completed = submissions?.filter((s: any) => s.berthId).length || 0;
-        return { active, completed };
-      }
-      case 4: {
-        // Active: Services started but not finished
-        const started = serviceLogs?.filter((l: any) => l.status === 'started').length || 0;
-        // Completed: Services finished
-        const completed = serviceLogs?.filter((l: any) => l.status === 'completed' || l.status === 'resolved').length || 0;
-        return { active: started, completed };
-      }
-      case 5: {
-        // Active: Invoices issued but not paid
-        const issued = invoices?.filter((i: any) => i.status === 'issued').length || 0;
-        // Completed: Invoices paid
-        const paid = invoices?.filter((i: any) => i.status === 'paid').length || 0;
-        return { active: issued, completed: paid };
-      }
-      case 6: {
-        // EBL status tracking
-        const active = ebls?.filter((e: any) => e.status === 'draft').length || 0;
-        const completed = ebls?.filter((e: any) => e.status === 'issued').length || 0;
-        return { active, completed };
-      }
-      default:
-        return { active: 0, completed: 0 };
+      case 1: return {
+        active: submissions?.filter((s: any) => ['pending', 'submitted'].includes(s.status?.toLowerCase())).length || 0,
+        completed: submissions?.filter((s: any) => !['pending', 'submitted'].includes(s.status?.toLowerCase())).length || 0,
+      };
+      case 2: return {
+        active: submissions?.filter((s: any) => s.status?.toLowerCase() === 'compliant').length || 0,
+        completed: submissions?.filter((s: any) => s.status?.toLowerCase() === 'approved').length || 0,
+      };
+      case 3: return {
+        active: submissions?.filter((s: any) => s.status?.toLowerCase() === 'approved' && !s.berthId).length || 0,
+        completed: submissions?.filter((s: any) => s.berthId).length || 0,
+      };
+      case 4: return {
+        active: serviceLogs?.filter((l: any) => l.status === 'started').length || 0,
+        completed: serviceLogs?.filter((l: any) => l.status === 'completed' || l.status === 'resolved').length || 0,
+      };
+      case 5: return {
+        active: invoices?.filter((i: any) => i.status === 'issued').length || 0,
+        completed: invoices?.filter((i: any) => i.status === 'paid').length || 0,
+      };
+      case 6: return {
+        active: ebls?.filter((e: any) => e.status === 'draft').length || 0,
+        completed: ebls?.filter((e: any) => e.status === 'issued').length || 0,
+      };
+      default: return { active: 0, completed: 0 };
     }
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Flow Header */}
-      <div className="port-card p-8 bg-gradient-to-r from-[#1a2f45] to-[#2a4a6f] text-white rounded-3xl shadow-2xl border border-white/10">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-14 h-14 rounded-2xl bg-portaccent/20 flex items-center justify-center text-2xl text-portaccent border border-portaccent/30">
-            <FaShip />
-          </div>
-          <div>
-            <h2 className="text-3xl font-display font-bold">PortChain Complete Flow</h2>
-            <p className="text-sm opacity-80">End-to-end blockchain-powered port operations</p>
-          </div>
-        </div>
-        
-        {/* Quantified Benefits */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-            <p className="text-2xl font-display font-bold text-portaccent">70%</p>
-            <p className="text-[10px] uppercase tracking-widest opacity-80 mt-1">Faster Clearance</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-            <p className="text-2xl font-display font-bold text-portaccent">90%</p>
-            <p className="text-[10px] uppercase tracking-widest opacity-80 mt-1">Less Manual Work</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-            <p className="text-2xl font-display font-bold text-portaccent">60%</p>
-            <p className="text-[10px] uppercase tracking-widest opacity-80 mt-1">Faster Payment</p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
-            <p className="text-2xl font-display font-bold text-portaccent">40%</p>
-            <p className="text-[10px] uppercase tracking-widest opacity-80 mt-1">Cost Reduction</p>
-          </div>
-        </div>
-      </div>
+    <div className="w-full text-slate-900 font-sans selection:bg-sky-100 selection:text-sky-900">
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+      `}</style>
 
-      {/* Phase Flow */}
-      <div className="space-y-4">
-        {phases.map((phase, idx) => {
-          const Icon = phase.icon;
-          const status = getPhaseStatus(phase.id);
-          
-          return (
-            <div key={phase.id} className="port-card bg-white border border-portmid/50 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all">
-              <div className="p-6 flex items-start gap-6">
-                {/* Phase Icon & Number */}
-                <div className="flex-shrink-0">
-                  <div className={`${phase.color} w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-lg relative`}>
-                    <Icon className="text-2xl" />
-                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center text-xs font-bold text-portaccent shadow-md border-2 border-portaccent">
-                      {phase.id}
-                    </div>
-                  </div>
+      <div className="max-w-6xl mx-auto">
+        {/* ── HEADER ── */}
+        <header className="relative mb-8 overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          {/* Subtle background effects */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-sky-500/[0.03] blur-[100px] -mr-48 -mt-48" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/[0.03] blur-[100px] -ml-32 -mb-32" />
+
+          <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 rounded-xl bg-sky-50 border border-sky-100 shadow-sm animate-[float_4s_ease-in-out_infinite]">
+                  <FaNetworkWired className="text-2xl text-sky-600" />
                 </div>
-
-                {/* Phase Content */}
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="text-xl font-display font-bold text-color-text-primary">{phase.title}</h3>
-                      <p className="text-sm text-color-text-secondary flex items-center gap-2 mt-1">
-                        <FaClock className="text-xs" /> {phase.subtitle}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="flex items-center gap-3">
-                        <div className="text-center px-3">
-                          <p className="text-lg font-display font-bold text-portaccent">{status.active}</p>
-                          <p className="text-[10px] uppercase tracking-wider text-color-text-muted">Active</p>
-                        </div>
-                        <div className="w-px h-10 bg-portmid/30" />
-                        <div className="text-center px-3">
-                          <p className="text-lg font-display font-bold text-emerald-600">{status.completed}</p>
-                          <p className="text-[10px] uppercase tracking-wider text-color-text-muted">Completed</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Benefits */}
-                  <div className="mb-4">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-color-text-muted mb-2">Key Benefits</p>
-                    <div className="flex flex-wrap gap-2">
-                      {phase.benefits.map((benefit, bIdx) => (
-                        <span key={bIdx} className="bg-portbase/50 px-3 py-1 rounded-full text-xs font-medium text-portaccent border border-portmid/30">
-                          {benefit}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Steps */}
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-color-text-muted mb-2">Process Steps</p>
-                    <div className="flex flex-wrap gap-2">
-                      {phase.steps.map((step, sIdx) => (
-                        <div key={sIdx} className="flex items-center gap-2 text-xs text-color-text-secondary">
-                          <span className="w-5 h-5 rounded-full bg-portaccent/10 flex items-center justify-center text-portaccent font-bold text-[10px]">
-                            {sIdx + 1}
-                          </span>
-                          <span>{step}</span>
-                          {sIdx < phase.steps.length - 1 && <FaArrowRight className="text-[10px] text-portmid/50" />}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                <div className="h-px w-12 bg-slate-200" />
+                <span className="text-[10px] font-black tracking-[0.3em] text-sky-600 uppercase">
+                  Network Active / v2.4.0
+                </span>
               </div>
-
-              {/* Connection Line */}
-              {idx < phases.length - 1 && (
-                <div className="px-6 pb-4">
-                  <div className="flex items-center justify-center gap-2 text-portmid/40">
-                    <div className="flex-1 h-px bg-portmid/30" />
-                    <FaArrowDown className="text-sm" />
-                    <div className="flex-1 h-px bg-portmid/30" />
-                  </div>
-                </div>
-              )}
+              <h1 className="text-4xl md:text-5xl font-black tracking-tight text-slate-900 font-roboto mb-4">
+                PortChain <span className="text-slate-400 font-light">Protocol</span>
+              </h1>
+              <p className="text-slate-500 text-lg leading-relaxed max-w-xl">
+                Redefining global maritime logistics through immutable ledger transparency and automated multi-agency orchestration.
+              </p>
             </div>
-          );
-        })}
+
+
+          </div>
+
+
+        </header>
+
+        {/* ── FLOW TIMELINE ── */}
+        <section className="relative pl-4 md:pl-0">
+          {/* Timeline Background Line */}
+          <div className="absolute left-[23px] top-0 bottom-0 w-px bg-slate-200 hidden md:block" />
+
+          <div className="space-y-2">
+            {phases.map((phase, idx) => {
+              const st = getPhaseStatus(phase.id);
+              return (
+                <PhaseCard
+                  key={phase.id}
+                  phase={phase}
+                  index={idx}
+                  active={st.active}
+                  completed={st.completed}
+                />
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── FOOTER ── */}
+        <footer className="mt-10 py-6 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-6 text-slate-400">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Mainnet Verified
+            </div>
+          </div>
+
+          <p className="text-[10px] font-medium text-center md:text-right max-w-xs leading-relaxed">
+            Proprietary Enterprise Software. All ledger interactions are cryptographically signed and stored in perpetuity.
+          </p>
+        </footer>
       </div>
     </div>
   );

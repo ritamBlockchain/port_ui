@@ -1,8 +1,41 @@
 'use client';
 
-import { FaAnchor, FaMapMarkedAlt, FaFileInvoice, FaShip, FaCheckCircle, FaArrowRight, FaClipboardCheck, FaCertificate, FaBuilding } from 'react-icons/fa';
+import { FaAnchor, FaMapMarkedAlt, FaFileInvoice, FaShip, FaCheckCircle, FaArrowRight, FaClipboardCheck, FaCertificate, FaBuilding, FaNetworkWired, FaShieldAlt } from 'react-icons/fa';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useRef } from 'react';
+
+/* ─── Components ─────────────────────────────────────────── */
+
+function AnimatedNumber({ value }: { value: number | string }) {
+  const [display, setDisplay] = useState('0');
+  const ref = useRef<HTMLSpanElement>(null);
+  const animated = useRef(false);
+
+  useEffect(() => {
+    const target = typeof value === 'string' ? parseInt(value.replace(/[^\d]/g, '')) : value;
+    const suffix = typeof value === 'string' ? value.replace(/\d/g, '') : '';
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !animated.current) {
+        animated.current = true;
+        let start = 0;
+        const dur = 1500;
+        const startTime = performance.now();
+        const tick = (now: number) => {
+          const p = Math.min((now - startTime) / dur, 1);
+          const eased = 1 - Math.pow(1 - p, 4);
+          setDisplay(`${Math.floor(eased * (target || 0))}${suffix}`);
+          if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+    });
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [value]);
+
+  return <span ref={ref}>{display}</span>;
+}
 
 export default function PortAuthorityDashboard() {
   const { data: submissions } = useQuery({
@@ -39,152 +72,193 @@ export default function PortAuthorityDashboard() {
 
   // Stakeholder Journey Steps
   const journeySteps = [
-    { id: 1, title: 'Approve Submissions', description: 'Review & authorize entries', icon: FaClipboardCheck, status: 'active' },
-    { id: 2, title: 'Assign Berths', description: 'Optimize port capacity', icon: FaBuilding, status: 'pending' },
-    { id: 3, title: 'Generate Invoices', description: 'Aggregate service logs', icon: FaFileInvoice, status: 'pending' },
-    { id: 4, title: 'Issue Credentials', description: 'Verify & certify vessels', icon: FaCertificate, status: 'pending' }
+    { id: 1, title: 'Approvals', description: 'Authorize Entries', icon: FaClipboardCheck, status: 'active', color: '#6366f1' },
+    { id: 2, title: 'Berths', description: 'Assign Capacity', icon: FaBuilding, status: 'pending', color: '#f59e0b' },
+    { id: 3, title: 'Invoicing', description: 'Aggregate Logs', icon: FaFileInvoice, status: 'pending', color: '#10b981' },
+    { id: 4, title: 'Credentials', description: 'Verify Vessels', icon: FaCertificate, status: 'pending', color: '#06b6d4' }
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Stakeholder Journey Banner */}
-      <div className="port-card p-6 bg-gradient-to-r from-[#1a2f45] to-[#2a4a6f] text-white rounded-2xl shadow-xl border border-white/10">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-xl font-display font-bold mb-1">Port Authority Journey</h3>
-            <p className="text-sm opacity-80">60% reduction in manual coordination through blockchain automation</p>
-          </div>
-          <div className="bg-portaccent/20 px-4 py-2 rounded-xl border border-portaccent/30">
-            <p className="text-2xl font-display font-bold text-portaccent">60%</p>
-            <p className="text-[10px] uppercase tracking-widest text-portaccent">Efficiency Gain</p>
-          </div>
-        </div>
-        <div className="flex items-center justify-between gap-2">
-          {journeySteps.map((step, idx) => {
-            const Icon = step.icon;
-            return (
-              <div key={step.id} className="flex-1 flex flex-col items-center text-center">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${step.status === 'active' ? 'bg-portaccent text-white' : 'bg-white/10 text-white/60'}`}>
-                  <Icon className="text-lg" />
+    <div className="space-y-12 animate-fade-up font-roboto">
+      {/* ── STAKEHOLDER JOURNEY BANNER (WHITE THEME) ── */}
+      <section className="relative overflow-hidden rounded-[3.5rem] bg-white p-1 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.05)] border border-slate-100">
+        <div className="absolute inset-0 opacity-[0.03] mix-blend-multiply" 
+          style={{ background: 'radial-gradient(circle at 10% 20%, #6366f1 0%, transparent 40%), radial-gradient(circle at 90% 80%, #10b981 0%, transparent 40%)' }} 
+        />
+        
+        <div className="relative z-10 p-10 md:p-14 rounded-[3rem] bg-white">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-12 mb-12">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 rounded-xl bg-indigo-50 border border-indigo-100 shadow-sm animate-float">
+                  <FaShieldAlt className="text-2xl text-indigo-600" />
                 </div>
-                <p className="text-xs font-bold uppercase tracking-wider">{step.title}</p>
-                <p className="text-[10px] opacity-60 mt-1">{step.description}</p>
-                {idx < journeySteps.length - 1 && <FaArrowRight className="text-white/20 text-xs mt-2" />}
+                <div className="h-px w-10 bg-slate-200" />
+                <span className="text-[10px] font-black tracking-[0.3em] text-indigo-600 uppercase">
+                  Authorized Port Control
+                </span>
               </div>
-            );
-          })}
+              <h3 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 leading-none mb-4">
+                Port Authority <span className="text-slate-200 font-light italic">Journey</span>
+              </h3>
+              <p className="text-slate-500 text-lg leading-relaxed max-w-xl font-medium">
+                Unified orchestration of maritime logistics through immutable ledger transparency and automated multi-agency coordination.
+              </p>
+            </div>
+          </div>
+
+          {/* Journey Steps Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {journeySteps.map((step, idx) => {
+              const Icon = step.icon;
+              return (
+                <div key={step.id} className="group relative">
+                  <div className="flex flex-col items-center p-6 rounded-3xl bg-white border border-slate-100 shadow-sm transition-all duration-500 hover:shadow-xl hover:-translate-y-1 group-hover:border-indigo-100">
+                    <div 
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3"
+                      style={{ background: `${step.color}10`, border: `1px solid ${step.color}20` }}
+                    >
+                      <Icon className="text-2xl" style={{ color: step.color }} />
+                    </div>
+                    <p className="text-xs font-black text-slate-900 uppercase tracking-widest text-center">{step.title}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1 text-center">{step.description}</p>
+                  </div>
+                  {idx < journeySteps.length - 1 && (
+                    <div className="hidden md:block absolute -right-3 top-1/2 -translate-y-1/2 z-20">
+                      <FaArrowRight className="text-slate-200 text-xs" />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
+      </section>
+
+      {/* ── KEY METRICS (WHITE MODE STAT CARDS) ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {[
+          { label: 'Active Vessels', value: activeVessels.length, icon: FaShip, color: '#6366f1', status: 'In Port' },
+          { label: 'Pending Berths', value: pendingBerth.length, icon: FaMapMarkedAlt, color: '#f59e0b', status: 'Awaiting Assignment' },
+          { label: 'Live Services', value: activeServices.length, icon: FaFileInvoice, color: '#10b981', status: 'Operational Logs' }
+        ].map((stat, i) => {
+          const Icon = stat.icon;
+          return (
+            <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 group">
+              <div className="flex justify-between items-center mb-8">
+                <div 
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3"
+                  style={{ background: `${stat.color}08`, border: `1px solid ${stat.color}15` }}
+                >
+                  <Icon className="text-3xl" style={{ color: stat.color }} />
+                </div>
+                <span className="px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-slate-50 border border-slate-100 text-slate-400">
+                  {stat.status}
+                </span>
+              </div>
+              <div>
+                <p className="text-5xl font-black text-slate-900 tracking-tighter mb-2">
+                  <AnimatedNumber value={stat.value} />
+                </p>
+                <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">{stat.label}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="port-card p-6 bg-indigo-600 text-white shadow-xl shadow-indigo-600/20 flex flex-col justify-between">
-           <div className="flex justify-between items-start">
-              <FaShip className="text-3xl opacity-30" />
-              <span className="text-[10px] bg-white/20 px-2 py-1 rounded font-bold uppercase">In Port</span>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        {/* ── BERTH MANAGEMENT ── */}
+        <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col transition-all hover:shadow-md">
+           <div className="p-8 border-b border-slate-50 flex justify-between items-center">
+              <div>
+                <h4 className="text-xl font-black tracking-tight text-slate-900 flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600"><FaAnchor /></div>
+                  Berth Assignment <span className="text-slate-300 font-light text-sm italic">Phase 03</span>
+                </h4>
+              </div>
+              <Link href="/berth" className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline">Manage All Berths</Link>
            </div>
-           <div className="mt-8">
-              <p className="text-4xl font-display">{activeVessels.length}</p>
-              <p className="text-xs opacity-80 uppercase font-bold tracking-widest">Active Vessel Entries</p>
-           </div>
-        </div>
-
-        <div className="port-card p-6 bg-amber-500 text-white shadow-xl shadow-amber-500/20 flex flex-col justify-between">
-           <div className="flex justify-between items-start">
-              <FaMapMarkedAlt className="text-3xl opacity-30" />
-              <span className="text-[10px] bg-white/20 px-2 py-1 rounded font-bold uppercase">Pending Berth</span>
-           </div>
-           <div className="mt-8">
-              <p className="text-4xl font-display">{pendingBerth.length}</p>
-              <p className="text-xs opacity-80 uppercase font-bold tracking-widest">Awaiting Assignment</p>
-           </div>
-        </div>
-
-        <div className="port-card p-6 bg-emerald-600 text-white shadow-xl shadow-emerald-600/20 flex flex-col justify-between">
-           <div className="flex justify-between items-start">
-              <FaFileInvoice className="text-3xl opacity-30" />
-              <span className="text-[10px] bg-white/20 px-2 py-1 rounded font-bold uppercase">Services</span>
-           </div>
-           <div className="mt-8">
-              <p className="text-4xl font-display">{activeServices.length}</p>
-              <p className="text-xs opacity-80 uppercase font-bold tracking-widest">Live Service Logs</p>
-           </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Berth Management - Phase 3 */}
-        <div className="port-card bg-white border border-portmid/50 overflow-hidden shadow-sm">
-           <div className="p-6 border-b border-portmid/20 flex justify-between items-center">
-              <h4 className="text-lg font-display flex items-center gap-2">
-                <FaAnchor className="text-indigo-600" /> Phase 3: Berth Assignment
-              </h4>
-              <Link href="/berth" className="text-xs font-bold text-portaccent uppercase hover:underline">Manage Berths</Link>
-           </div>
-           <div className="divide-y divide-portmid/10">
+           
+           <div className="flex-1 divide-y divide-slate-50">
               {pendingBerth.length ? pendingBerth.map((v: any) => (
-                <div key={v.submissionId} className="p-4 flex items-center justify-between hover:bg-portbase/30 transition-colors">
-                   <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
-                        <FaShip />
+                <div key={v.submissionId} className="p-6 flex items-center justify-between hover:bg-slate-50 transition-all group/vessel">
+                   <div className="flex items-center gap-5">
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-50/50 flex items-center justify-center text-indigo-600 transition-transform group-hover/vessel:scale-110">
+                        <FaShip className="text-lg" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold uppercase">{v.vesselName}</p>
-                        <p className="text-[10px] text-color-text-muted font-mono">{v.vesselIMO}</p>
+                        <p className="text-sm font-black text-slate-900 uppercase tracking-tight group-hover/vessel:text-indigo-600 transition-colors">{v.vesselName}</p>
+                        <p className="text-[10px] text-slate-400 font-bold tracking-widest mt-1">IMO: {v.vesselIMO}</p>
                       </div>
                    </div>
                    <Link 
                     href={`/pre-arrival/${v.submissionId}`}
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center gap-2"
+                    className="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all flex items-center gap-2 shadow-lg shadow-slate-900/10"
                    >
-                     Assign <FaArrowRight />
+                     Assign Berth <FaArrowRight className="text-[8px]" />
                    </Link>
                 </div>
               )) : (
-                <div className="p-10 text-center flex flex-col items-center gap-2 text-color-text-muted">
-                    <FaCheckCircle className="text-3xl text-emerald-500" />
-                    <p className="text-sm italic">All approved vessels assigned berths</p>
+                <div className="p-20 text-center flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 shadow-inner">
+                      <FaCheckCircle className="text-3xl" />
+                    </div>
+                    <p className="text-sm font-bold text-slate-400 italic">All approved vessels assigned berths.</p>
                 </div>
               )}
            </div>
         </div>
 
-        {/* Financial Clearance - Phase 5 */}
-        <div className="port-card bg-white border border-portmid/50 overflow-hidden shadow-sm">
-           <div className="p-6 border-b border-portmid/20 flex justify-between items-center text-emerald-600">
-              <h4 className="text-lg font-display flex items-center gap-2 uppercase">
-                <FaFileInvoice /> Phase 5: Invoicing & Settlement
-              </h4>
-              <Link href="/invoices" className="text-xs font-bold text-emerald-600 uppercase hover:underline">Invoicing Board</Link>
+        {/* ── FINANCIAL CLEARANCE ── */}
+        <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col transition-all hover:shadow-md">
+           <div className="p-8 border-b border-slate-50 flex justify-between items-center">
+              <div>
+                <h4 className="text-xl font-black tracking-tight text-slate-900 flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600"><FaFileInvoice /></div>
+                  Settlement Board <span className="text-slate-300 font-light text-sm italic">Phase 05</span>
+                </h4>
+              </div>
+              <Link href="/invoices" className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:underline">Full Board</Link>
            </div>
-           <div className="p-6">
-              <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 text-center">
-                 <p className="text-sm text-emerald-700 mb-4 font-medium leading-relaxed">
-                   Aggregated services can be converted into unified port invoices once logs are marked as completed.
+           
+           <div className="p-8 space-y-8">
+              <div className="bg-emerald-50/30 border border-emerald-100/50 rounded-3xl p-8 text-center group">
+                 <p className="text-sm text-slate-500 mb-6 font-medium leading-relaxed">
+                   Aggregated services can be converted into unified <span className="text-emerald-700 font-black">port invoices</span> once logs are verified.
                  </p>
-                 <Link href="/invoices" className="port-btn-primary bg-emerald-600 hover:bg-emerald-700 w-full flex items-center justify-center gap-3 py-4 shadow-lg shadow-emerald-600/20">
+                 <Link href="/invoices" className="w-full py-4 rounded-2xl bg-emerald-600 text-white text-xs font-black uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-600/20 flex items-center justify-center gap-3">
                     <FaFileInvoice /> Generate Service Invoices
                  </Link>
               </div>
               
-              <div className="mt-8 space-y-4">
-                 <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest text-color-text-muted pb-2 border-b border-portmid/20">
+              <div className="space-y-6">
+                 <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 pb-2 border-b border-slate-50">
                     <span>Recent Settlements</span>
-                    <span>Amount</span>
+                    <span>Amount (USD)</span>
                  </div>
-                 {paidInvoices.length > 0 ? paidInvoices.slice(0, 3).map((inv: any) => (
-                   <div key={inv.invoiceId} className="flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                         <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-[10px]">
-                            <FaCheckCircle />
-                         </div>
-                         <span className="text-sm font-mono">{inv.vesselIMO}</span>
-                      </div>
-                      <span className="text-sm font-mono font-bold">{inv.currency || 'USD'} {(inv.totalAmount || 0).toLocaleString()}</span>
-                   </div>
-                 )) : (
-                   <p className="text-center py-4 text-sm italic text-color-text-muted">No settled invoices yet</p>
-                 )}
+                 <div className="space-y-4">
+                   {paidInvoices.length > 0 ? paidInvoices.slice(0, 3).map((inv: any) => (
+                     <div key={inv.invoiceId} className="flex justify-between items-center group/inv">
+                        <div className="flex items-center gap-4">
+                           <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 transition-transform group-hover/inv:scale-110">
+                              <FaCheckCircle className="text-sm" />
+                           </div>
+                           <div>
+                             <span className="text-sm font-black text-slate-900 font-mono tracking-tighter">{inv.vesselIMO}</span>
+                             <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5">Verified Transaction</p>
+                           </div>
+                        </div>
+                        <span className="text-lg font-black text-slate-900 font-roboto tracking-tighter">
+                          $ {(inv.totalAmount || 0).toLocaleString()}
+                        </span>
+                     </div>
+                   )) : (
+                     <div className="py-10 text-center text-[11px] font-bold text-slate-300 italic uppercase tracking-widest">
+                       Waiting for first settlement...
+                     </div>
+                   )}
+                 </div>
               </div>
            </div>
         </div>

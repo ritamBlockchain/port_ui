@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { evaluateTransaction } from '@/lib/fabric/connection';
+import { MOCK_LEAVES } from '@/lib/fabric/mock-data';
 
 export async function GET() {
   try {
-    // Prefix scan for all Merkle leaves (merkle:leaf:*)
     const query = 'prefix:merkle:leaf:';
-
-
     console.log('Fetching live Merkle Audit Leaves from Ledger...');
     const result = await evaluateTransaction('QueryAssets', query);
     const resultString = result.toString();
@@ -23,10 +21,11 @@ export async function GET() {
 
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
-    console.error('Fabric Merkle Fetch Failed:', error.message);
+    console.error('Fabric Merkle All connection failed. Returning Mock Data:', error.message);
     return NextResponse.json({ 
-      success: false, 
-      error: error.message || 'Failed to fetch Merkle audit trail'
-    }, { status: 500 });
+      success: true, 
+      data: MOCK_LEAVES,
+      isMock: true
+    });
   }
 }

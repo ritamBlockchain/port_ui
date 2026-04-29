@@ -55,21 +55,21 @@ export default function PortServicesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-display text-color-text-primary">Port Service Logs</h1>
-          <p className="text-color-text-secondary">Monitor and manage operational services provided to vessels</p>
+          <h1 className="text-2xl sm:text-3xl font-display text-color-text-primary leading-tight">Port Service Logs</h1>
+          <p className="text-color-text-secondary text-sm sm:text-base">Monitor and manage operational services provided to vessels</p>
         </div>
-        <div className="flex gap-2">
-            <button onClick={() => refetch()} className="p-2 border border-portmid rounded-lg text-portaccent hover:bg-portbase">
+        <div className="flex items-center gap-2">
+            <button onClick={() => refetch()} className="p-2.5 border border-portmid rounded-xl text-portaccent hover:bg-portbase transition-colors flex-shrink-0">
                 <FaSync className={isLoading ? 'animate-spin' : ''} />
             </button>
             {['serviceprovider', 'admin', 'portauthority'].includes(role) && (
             <button 
               onClick={() => setShowForm(!showForm)}
-              className="port-btn-primary flex items-center gap-2"
+              className="port-btn-primary flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5"
             >
-                {showForm ? 'Cancel' : <><FaPlus /> Log New Service</>}
+                {showForm ? 'Cancel' : <><FaPlus /> <span className="whitespace-nowrap">Log New Service</span></>}
             </button>
             )}
         </div>
@@ -127,12 +127,12 @@ export default function PortServicesPage() {
         </div>
       ) : logs && logs.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
-          {logs.map((log: any) => {
+          {logs.map((log: any, index: number) => {
             const Icon = serviceIcons[log.serviceType] || FaAnchor;
             const isRequest = log.type === 'request';
 
             return (
-              <div key={log.logId} className={`port-card p-6 flex items-center justify-between group hover:border-portaccent transition-all animate-in slide-in-from-bottom duration-300 ${isRequest ? 'border-amber-200 bg-amber-50/30' : ''}`}>
+              <div key={log.logId || log.requestId || index} className={`port-card p-6 flex items-center justify-between group hover:border-portaccent transition-all animate-in slide-in-from-bottom duration-300 ${isRequest ? 'border-amber-200 bg-amber-50/30' : ''}`}>
                 <div className="flex items-center gap-6">
                   <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm group-hover:bg-portaccent group-hover:text-white transition-all ring-1 ring-portmid/30 ${isRequest ? 'bg-amber-100 text-amber-600' : 'bg-white text-portaccent'}`}>
                     <Icon className="text-2xl" />

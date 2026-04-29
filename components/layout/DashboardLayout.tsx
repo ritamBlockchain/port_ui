@@ -13,12 +13,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="flex bg-[#F7FBFC] min-h-screen">
       <Sidebar />
       <main className={cn(
-        "flex-1 p-8 transition-all duration-300 ease-in-out",
-        isCollapsed ? "ml-20" : "ml-72"
+        "flex-1 transition-all duration-300 ease-in-out flex flex-col min-w-0",
+        "lg:ml-72",
+        isCollapsed && "lg:ml-20"
       )}>
         <Header />
-        <div className="max-w-7xl mx-auto">
-          {children}
+        <div className="flex-1 p-4 sm:p-8 pt-0">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </div>
       </main>
     </div>

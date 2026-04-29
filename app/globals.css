@@ -1,61 +1,78 @@
 @import "tailwindcss";
 
 @theme {
-  --color-base: #F7FBFC;
-  --color-surface: #D6E6F2;
-  --color-mid: #B9D7EA;
-  --color-accent: #769FCD;
+  --color-base: #FFFFFF;
+  --color-surface: #FFFFFF;
+  --color-mid: #E2E8F0;
+  --color-accent: #04172F;
 
-  --color-background: var(--color-base);
-  --color-foreground: #1a2f45;
+  --color-background: #FFFFFF;
+  --color-foreground: #04172F;
   
-  --color-portbase: #F7FBFC;
-  --color-portsurface: #D6E6F2;
-  --color-portmid: #B9D7EA;
-  --color-portaccent: #769FCD;
+  --color-portbase: #FFFFFF;
+  --color-portsurface: #FFFFFF;
+  --color-portmid: #E2E8F0;
+  --color-portaccent: #04172F;
 
-  --color-success: #4caf8f;
-  --color-warning: #e8a838;
-  --color-danger: #d64545;
-  --color-info: #769FCD;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-info: #3B82F6;
 
-  --color-text-primary: #1a2f45;
-  --color-text-secondary: #4a6b8a;
-  --color-text-muted: #7a9bb5;
+  --color-text-primary: #04172F;
+  --color-text-secondary: #64748B;
+  --color-text-muted: #94A3B8;
 
-  --font-display: 'DM Serif Display', serif;
-  --font-sans: 'DM Sans', sans-serif;
+  --font-display: var(--font-sans);
+  --font-sans: var(--font-sans);
   --font-mono: 'JetBrains Mono', monospace;
 }
 
 @layer base {
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    background-color: #FFFFFF;
+    color: #04172F;
     @apply font-sans;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    color: var(--color-portaccent);
-    @apply font-display;
+    @apply font-sans;
   }
 }
 
 @layer components {
   .port-card {
-    background-color: var(--color-portsurface);
-    border: 1px solid var(--color-portmid);
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
     @apply rounded-xl shadow-sm overflow-hidden;
   }
 
   .port-btn-primary {
-    background-color: var(--color-portaccent);
-    @apply text-white px-4 py-2 rounded-lg hover:bg-[#5a87b8] transition-colors duration-150 font-medium;
+    background-color: #04172F;
+    @apply text-white px-4 py-2 rounded-lg hover:bg-[#062144] transition-colors duration-150 font-medium;
   }
 
   .port-input {
-    background-color: var(--color-portbase);
-    border: 1px solid var(--color-portmid);
-    @apply rounded-lg px-3 py-2 focus:ring-2 focus:ring-portaccent focus:outline-none transition-all;
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    @apply rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all;
+  }
+}
+
+@layer utilities {
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-up {
+    animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
   }
 }

@@ -16,17 +16,17 @@ export default function DraftList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-display uppercase">eBL Collaborative Drafts</h1>
-          <p className="text-color-text-secondary">Manage and revise title documents before final ledger commitment</p>
+          <h1 className="text-2xl sm:text-3xl font-display uppercase leading-tight">eBL Collaborative Drafts</h1>
+          <p className="text-color-text-secondary text-sm sm:text-base">Manage and revise title documents before final ledger commitment</p>
         </div>
-        <div className="flex gap-2">
-            <button onClick={() => refetch()} className="p-2 border border-portmid rounded-lg text-portaccent">
+        <div className="flex items-center gap-2">
+            <button onClick={() => refetch()} className="p-2.5 border border-portmid rounded-xl text-portaccent hover:bg-portbase transition-colors flex-shrink-0">
                 <FaSync className={isLoading ? 'animate-spin' : ''} />
             </button>
-            <Link href="/ebl/draft" className="port-btn-primary flex items-center gap-2">
-                <FaFileSignature /> Initiate New Draft
+            <Link href="/ebl/draft" className="port-btn-primary flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5">
+                <FaFileSignature /> <span className="whitespace-nowrap">Initiate New Draft</span>
             </Link>
         </div>
       </div>

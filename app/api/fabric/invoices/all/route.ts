@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { evaluateTransaction } from '@/lib/fabric/connection';
+import { MOCK_INVOICES } from '@/lib/fabric/mock-data';
 
 export async function GET() {
   try {
@@ -61,7 +62,11 @@ export async function GET() {
     console.log(`[DEBUG] Returning ${data.length} valid invoices to frontend.`);
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
-    console.error('Invoice Query Error:', error);
-    return NextResponse.json({ success: false, data: [] }); 
+    console.error('Invoice Query Error. Returning Mock Data:', error.message);
+    return NextResponse.json({ 
+      success: true, 
+      data: MOCK_INVOICES,
+      isMock: true
+    }); 
   }
 }

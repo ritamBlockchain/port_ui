@@ -6,17 +6,21 @@ import * as path from 'path';
 export async function buildWallet() {
   const wallet = await Wallets.newInMemoryWallet();
 
-  // Hardcoded paths to fabric-samples
-  const certPath = '/Users/ritambiswas/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem';
-  const keystoreDir = '/Users/ritambiswas/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore';
-  let keyPath = path.join(keystoreDir, '9641b4306e80407be6a4bd8737d64396f519492a21ce3343db539e551929ead8_sk');
+  // Use environment variables or fallback to old hardcoded ones for safety
+  const certPath = process.env.ADMIN_CERT_PATH || '/Users/ritambiswas/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem';
+  let keyPath = process.env.ADMIN_KEY_PATH || '';
+  
+  const mspDir = path.dirname(path.dirname(certPath)); // .../msp
+  const keystoreDir = path.join(mspDir, 'keystore');
 
-  // Auto-discover key file if the exact path doesn't exist
-  if (!fs.existsSync(keyPath) && fs.existsSync(keystoreDir)) {
-    const files = fs.readdirSync(keystoreDir).filter(f => f.endsWith('_sk'));
-    if (files.length > 0) {
-      keyPath = path.join(keystoreDir, files[0]);
-      console.log(`Auto-discovered keystore file: ${files[0]}`);
+  // If keyPath is not provided or doesn't exist, try to discover it in the keystore dir
+  if (!keyPath || !fs.existsSync(keyPath)) {
+    if (fs.existsSync(keystoreDir)) {
+      const files = fs.readdirSync(keystoreDir).filter(f => !f.startsWith('.'));
+      if (files.length > 0) {
+        keyPath = path.join(keystoreDir, files[0]);
+        console.log(`Auto-discovered keystore file: ${path.basename(keyPath)}`);
+      }
     }
   }
 
@@ -32,7 +36,7 @@ export async function buildWallet() {
 
   const identity: X509Identity = {
     credentials: { certificate, privateKey },
-    mspId: 'Org1MSP',
+    mspId: process.env.FABRIC_ORG || 'Org1MSP',
     type: 'X.509',
   };
 
@@ -42,8 +46,8 @@ export async function buildWallet() {
 }
 
 export function buildCCPOrg1() {
-  // Hardcoded path to fabric-samples
-  const ccpPath = '/Users/ritambiswas/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.json';
+  const ccpPath = process.env.CONNECTION_PROFILE_PATH || '/Users/ritambiswas/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.json';
+  
   if (!fs.existsSync(ccpPath)) {
     console.error(`Connection profile not found at: ${ccpPath}`);
     return {
@@ -55,6 +59,7 @@ export function buildCCPOrg1() {
     };
   }
   const contents = fs.readFileSync(ccpPath, 'utf8');
-  console.log('✅ Connection profile loaded');
+  console.log('✅ Connection profile loaded from', ccpPath);
   return JSON.parse(contents);
 }
+

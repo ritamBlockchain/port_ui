@@ -13,7 +13,7 @@ export default function PreArrivalDetailPage() {
   const { submissionId } = useParams();
   const router = useRouter();
   const { role } = useAuth();
-  const { submission, isLoading, error, validateCompliance } = usePreArrival(submissionId as string);
+  const { submission, isLoading, error, validateCompliance, overrideCompliance } = usePreArrival(submissionId as string);
 
   if (isLoading) return (
     <div className="py-20 flex flex-col items-center gap-4 text-portaccent animate-pulse">
@@ -203,14 +203,28 @@ export default function PreArrivalDetailPage() {
                   </div>
                   <span className="font-bold text-sm">Compliance Check</span>
                 </div>
-                {['pending', 'submitted'].includes(submission.status?.toLowerCase() || '') && (
+                {['pending', 'submitted'].includes(submission.status?.toLowerCase() || '') && ['customs', 'admin'].includes(role) && (
                   <button 
                     onClick={() => validateCompliance.mutate()}
                     disabled={validateCompliance.isPending}
                     className="w-full mt-2 port-btn-primary flex items-center justify-center gap-2 py-2 text-sm"
                   >
                     <FaShieldAlt className={validateCompliance.isPending ? 'animate-spin' : ''} />
-                    {validateCompliance.isPending ? 'Checking...' : 'Check Compliance'}
+                    {validateCompliance.isPending ? 'Automated Validation' : 'Run Compliance Engine'}
+                  </button>
+                )}
+
+                {(['flagged', 'pending', 'submitted'].includes(submission.status?.toLowerCase() || '')) && ['customs', 'admin'].includes(role) && (
+                  <button 
+                    onClick={() => {
+                      const reason = window.prompt("Enter reason for manual override:");
+                      if (reason) overrideCompliance.mutate({ newStatus: 'compliant', reason });
+                    }}
+                    disabled={overrideCompliance.isPending}
+                    className="w-full mt-2 bg-rose-100 text-rose-700 border border-rose-200 hover:bg-rose-200 transition-all flex items-center justify-center gap-2 py-2 text-xs font-bold uppercase rounded-lg"
+                  >
+                    <FaExclamationTriangle className={overrideCompliance.isPending ? 'animate-spin' : ''} />
+                    Manual Override
                   </button>
                 )}
                 {submission.status?.toLowerCase() === 'compliant' && (

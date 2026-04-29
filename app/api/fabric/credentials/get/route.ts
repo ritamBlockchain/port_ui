@@ -10,8 +10,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Credential ID missing' }, { status: 400 });
     }
 
+    let cleanId = id;
+    if (cleanId.startsWith('did:portchain:')) {
+      cleanId = cleanId.replace('did:portchain:', '');
+    }
+
     // Fabric GetCredential function (from portchain.go)
-    const result = await evaluateTransaction('GetCredential', id);
+    const result = await evaluateTransaction('GetCredential', cleanId);
     
     return NextResponse.json({ 
       success: true, 

@@ -100,6 +100,26 @@ export function usePreArrival(submissionId?: string) {
     approve: approveMutation.mutate,
     isApproving: approveMutation.isPending,
     validateCompliance: validateComplianceMutation,
+    overrideCompliance: useMutation({
+      mutationFn: async ({ newStatus, reason }: { newStatus: string; reason: string }) => {
+        const res = await fetch('/api/fabric/pre-arrival/override', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ submissionId, newStatus, reason }),
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error);
+        return json;
+      },
+      onSuccess: () => {
+        toast.success('Compliance status overridden on blockchain');
+        queryClient.invalidateQueries({ queryKey: ['pre-arrival'] });
+        queryClient.invalidateQueries({ queryKey: ['pre-arrival-list'] });
+      },
+      onError: (err: any) => {
+        toast.error(`Override failed: ${err.message}`);
+      },
+    }),
   };
 }
 

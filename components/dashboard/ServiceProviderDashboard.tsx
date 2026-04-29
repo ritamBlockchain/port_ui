@@ -23,7 +23,8 @@ export default function ServiceProviderDashboard() {
     queryFn: async () => {
       const res = await fetch('/api/fabric/services/all');
       const json = await res.json();
-      return json.success ? json.data?.filter((l: any) => l.providerId === role || l.serviceType?.includes(role)).slice(0, 5) || [] : [];
+      // Show all logs for service provider/admin for now, as providerId on ledger is an X509 string
+      return json.success ? json.data?.slice(0, 5) || [] : [];
     }
   });
 
@@ -32,7 +33,8 @@ export default function ServiceProviderDashboard() {
     queryFn: async () => {
       const res = await fetch('/api/fabric/services/all');
       const json = await res.json();
-      return json.success ? json.data?.filter((l: any) => (l.providerId === role || l.serviceType?.includes(role)) && l.status === 'completed').slice(0, 5) || [] : [];
+      // Filter for completed logs that don't have an invoice yet
+      return json.success ? json.data?.filter((l: any) => l.status === 'completed' && !l.invoiceId).slice(0, 5) || [] : [];
     }
   });
 

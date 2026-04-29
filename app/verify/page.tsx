@@ -135,84 +135,89 @@ export default function VerifyCredentialPage() {
         </Link>
       </div>
 
-      {/* Scanner Section */}
-      <div className="port-card p-8 bg-white">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-portaccent mb-6 flex items-center gap-2">
-          <FaQrcode /> QR Code Scanner
-        </h3>
-        
-        {!isScanning ? (
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-64 h-64 border-4 border-dashed border-portmid rounded-2xl flex items-center justify-center bg-portsurface/30">
-              <div className="text-center">
-                <FaQrcode className="text-6xl text-portmid mx-auto mb-4" />
-                <p className="text-sm text-color-text-muted">Click below to start scanning</p>
+      {/* Scanner & Manual Sections - Hidden when a result is being shown */}
+      {!credential && !isLoading && (
+        <>
+          {/* Scanner Section */}
+          <div className="port-card p-8 bg-white">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-portaccent mb-6 flex items-center gap-2">
+              <FaQrcode /> QR Code Scanner
+            </h3>
+            
+            {!isScanning ? (
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-64 h-64 border-4 border-dashed border-portmid rounded-2xl flex items-center justify-center bg-portsurface/30">
+                  <div className="text-center">
+                    <FaQrcode className="text-6xl text-portmid mx-auto mb-4" />
+                    <p className="text-sm text-color-text-muted">Click below to start scanning</p>
+                  </div>
+                </div>
+                <button
+                  onClick={startScanner}
+                  className="port-btn-primary px-8 py-3 flex items-center gap-2"
+                >
+                  <FaQrcode /> Start Scanner
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-4">
+                <video
+                  ref={videoRef}
+                  className="w-64 h-64 object-cover rounded-2xl border-4 border-portaccent"
+                  autoPlay
+                  playsInline
+                  muted
+                />
+                <div className="text-center">
+                  <p className="text-sm font-bold text-portaccent mb-2">Align QR code within frame</p>
+                  <button
+                    onClick={stopScanner}
+                    className="px-6 py-2 border border-rose-200 text-rose-600 rounded-lg font-bold text-xs uppercase hover:bg-rose-50 transition-all"
+                  >
+                    Cancel Scan
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Manual Entry Section */}
+          <div className="port-card p-8 bg-white">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-6">
+              Manual Entry
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-color-text-muted block mb-1">Credential ID</label>
+                <input
+                  type="text"
+                  value={manualCredentialId}
+                  onChange={(e) => setManualCredentialId(e.target.value)}
+                  placeholder="CRED_1234567890_abc123"
+                  className="port-input"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-color-text-muted block mb-1">Certificate Hash (Optional)</label>
+                <input
+                  type="text"
+                  value={certificateHash}
+                  onChange={(e) => setCertificateHash(e.target.value)}
+                  placeholder="0x..."
+                  className="port-input"
+                />
               </div>
             </div>
             <button
-              onClick={startScanner}
-              className="port-btn-primary px-8 py-3 flex items-center gap-2"
+              onClick={handleManualVerify}
+              disabled={!manualCredentialId}
+              className="mt-4 port-btn-primary px-6 py-2 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <FaQrcode /> Start Scanner
+              <FaSync /> Verify Credential
             </button>
           </div>
-        ) : (
-          <div className="flex flex-col items-center gap-4">
-            <video
-              ref={videoRef}
-              className="w-64 h-64 object-cover rounded-2xl border-4 border-portaccent"
-              autoPlay
-              playsInline
-              muted
-            />
-            <div className="text-center">
-              <p className="text-sm font-bold text-portaccent mb-2">Align QR code within frame</p>
-              <button
-                onClick={stopScanner}
-                className="px-6 py-2 border border-rose-200 text-rose-600 rounded-lg font-bold text-xs uppercase hover:bg-rose-50 transition-all"
-              >
-                Cancel Scan
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Manual Entry Section */}
-      <div className="port-card p-8 bg-white">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-6">
-          Manual Entry
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="text-[10px] font-bold uppercase tracking-widest text-color-text-muted block mb-1">Credential ID</label>
-            <input
-              type="text"
-              value={manualCredentialId}
-              onChange={(e) => setManualCredentialId(e.target.value)}
-              placeholder="CRED_1234567890_abc123"
-              className="port-input"
-            />
-          </div>
-          <div>
-            <label className="text-[10px] font-bold uppercase tracking-widest text-color-text-muted block mb-1">Certificate Hash (Optional)</label>
-            <input
-              type="text"
-              value={certificateHash}
-              onChange={(e) => setCertificateHash(e.target.value)}
-              placeholder="0x..."
-              className="port-input"
-            />
-          </div>
-        </div>
-        <button
-          onClick={handleManualVerify}
-          disabled={!manualCredentialId}
-          className="mt-4 port-btn-primary px-6 py-2 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <FaSync /> Verify Credential
-        </button>
-      </div>
+        </>
+      )}
 
       {/* Credential Display */}
       {isLoading && (
@@ -252,8 +257,8 @@ export default function VerifyCredentialPage() {
             </div>
             <div>
               <label className="text-[10px] font-bold uppercase tracking-widest text-color-text-muted block mb-1">Credential ID</label>
-              <p className="text-xs font-mono break-all bg-portsurface p-2 rounded border border-portmid">
-                {credential.credentialId}
+              <p className="text-xs font-mono break-all bg-portsurface p-2 rounded border border-portmid min-h-[2.5rem] flex items-center px-3">
+                {credential.id || credential.credentialId}
               </p>
             </div>
             <div>
@@ -270,14 +275,27 @@ export default function VerifyCredentialPage() {
             </div>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-portmid/30">
+          <div className="mt-6 pt-6 border-t border-portmid/30 flex gap-4">
+            {!verificationResult ? (
+              <button
+                onClick={handleVerify}
+                disabled={isVerifying}
+                className="port-btn-primary px-6 py-2 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isVerifying ? <FaSync className="animate-spin" /> : <FaCheckCircle />} 
+                {isVerifying ? 'Verify Authenticity' : 'Verify Authenticity'}
+              </button>
+            ) : null}
             <button
-              onClick={handleVerify}
-              disabled={isVerifying}
-              className="port-btn-primary px-6 py-2 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => {
+                setScannedCredentialId('');
+                setManualCredentialId('');
+                setVerificationResult(null);
+                window.history.replaceState({}, '', '/verify');
+              }}
+              className="px-6 py-2 border border-portmid text-color-text-secondary rounded-lg font-bold text-xs uppercase hover:bg-portbase transition-all"
             >
-              {isVerifying ? <FaSync className="animate-spin" /> : <FaCheckCircle />} 
-              {isVerifying ? 'Verifying...' : 'Verify Authenticity'}
+              Scan Another
             </button>
           </div>
 

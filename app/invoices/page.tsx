@@ -33,11 +33,14 @@ export default function InvoicesPage() {
         .then(res => res.json())
         .then(json => {
           if (json.success) {
-            const filtered = json.data.filter((l: any) =>
-              (l.submissionId === selectedSubmission || l.SubmissionId === selectedSubmission) &&
-              (l.status === 'completed' || l.status === 'resolved') &&
-              !(l.invoiceId || l.InvoiceId)
-            );
+            const filtered = json.data.filter((l: any) => {
+              const logSubId = (l.submissionId || l.SubmissionId || '').replace('did:portchain:', '');
+              const selSubId = selectedSubmission.replace('did:portchain:', '');
+              
+              return (logSubId === selSubId) &&
+                     (l.status === 'completed' || l.status === 'resolved') &&
+                     !(l.invoiceId || l.InvoiceId);
+            });
             setPreviewLogs(filtered);
           }
         })

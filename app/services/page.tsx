@@ -3,12 +3,12 @@
 import { useAuth } from '@/lib/api/auth';
 import { useServices } from '@/hooks/useServices';
 import { usePreArrivalList } from '@/hooks/usePreArrival';
-import { FaAnchor, FaShip, FaCogs, FaTools, FaCheckCircle, FaExclamationTriangle, FaPlus, FaSync, FaPlay, FaCheck } from 'react-icons/fa';
+import { FaAnchor, FaShip, FaCogs, FaTools, FaCheckCircle, FaExclamationTriangle, FaPlus, FaSync, FaPlay, FaCheck, FaTimes } from 'react-icons/fa';
 import { useState } from 'react';
 
 export default function PortServicesPage() {
   const { role } = useAuth();
-  const { logs, isLoading, refetch, startService, isStarting, completeService, isCompleting } = useServices();
+  const { logs, isLoading, refetch, startService, isStarting, completeService, isCompleting, dispute, cancelService } = useServices();
   const { data: submissions } = usePreArrivalList();
   
   const [showForm, setShowForm] = useState(false);
@@ -129,19 +129,26 @@ export default function PortServicesPage() {
         <div className="grid grid-cols-1 gap-4">
           {logs.map((log: any) => {
             const Icon = serviceIcons[log.serviceType] || FaAnchor;
+            const isRequest = log.type === 'request';
+
             return (
-              <div key={log.logId} className="port-card p-6 flex items-center justify-between group hover:border-portaccent transition-all animate-in slide-in-from-bottom duration-300">
+              <div key={log.logId} className={`port-card p-6 flex items-center justify-between group hover:border-portaccent transition-all animate-in slide-in-from-bottom duration-300 ${isRequest ? 'border-amber-200 bg-amber-50/30' : ''}`}>
                 <div className="flex items-center gap-6">
-                  <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-portaccent shadow-sm group-hover:bg-portaccent group-hover:text-white transition-all ring-1 ring-portmid/30">
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm group-hover:bg-portaccent group-hover:text-white transition-all ring-1 ring-portmid/30 ${isRequest ? 'bg-amber-100 text-amber-600' : 'bg-white text-portaccent'}`}>
                     <Icon className="text-2xl" />
                   </div>
                   <div>
                     <div className="flex items-center gap-3">
-                      <h3 className="font-display text-lg text-color-text-primary capitalize">{log.serviceType.replace('_', ' ')}</h3>
+                      <h3 className="font-display text-lg text-color-text-primary capitalize">
+                        {log.serviceType.replace('_', ' ')}
+                        {isRequest && <span className="ml-2 text-[10px] bg-amber-500 text-white px-1.5 py-0.5 rounded-full uppercase tracking-tighter">Request</span>}
+                      </h3>
                       <span className="text-[10px] font-mono bg-portmid/30 px-1.5 py-0.5 rounded text-color-text-secondary">{log.logId}</span>
                     </div>
                     <p className="text-sm font-bold text-color-text-primary uppercase tracking-tight">Vessel: {log.vesselIMO}</p>
-                    <p className="text-[10px] text-color-text-muted font-bold uppercase tracking-widest mt-1">Provider: {log.providerName}</p>
+                    <p className="text-[10px] text-color-text-muted font-bold uppercase tracking-widest mt-1">
+                      {isRequest ? `Requested At: ${new Date(log.requestedAt).toLocaleString()}` : `Provider: ${log.providerName}`}
+                    </p>
                   </div>
                 </div>
 
@@ -151,18 +158,53 @@ export default function PortServicesPage() {
                     <p className="text-sm font-medium">{log.durationMins || '--'} mins</p>
                   </div>
                   <div className="text-center hidden md:block">
-                    <p className="text-[10px] font-bold text-color-text-muted uppercase tracking-widest mb-1">Logged At</p>
-                    <p className="text-sm font-medium">{new Date(log.loggedAt).toLocaleDateString()}</p>
+                    <p className="text-[10px] font-bold text-color-text-muted uppercase tracking-widest mb-1">{isRequest ? 'Requested' : 'Logged'}</p>
+                    <p className="text-sm font-medium">{new Date(log.loggedAt || log.requestedAt).toLocaleDateString()}</p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border flex items-center gap-1.5 ${
                       log.status === 'completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
                       log.status === 'started' ? 'bg-blue-50 text-blue-600 border-blue-200 animate-pulse' :
-                      'bg-rose-50 text-rose-600 border-rose-200'
+                      log.status === 'open' ? 'bg-amber-50 text-amber-600 border-amber-200' :
+                      log.status === 'disputed' ? 'bg-rose-50 text-rose-600 border-rose-200' :
+                      log.status === 'resolved' ? 'bg-teal-50 text-teal-600 border-teal-200' :
+                      'bg-slate-50 text-slate-600 border-slate-200'
                     }`}>
-                      {log.status === 'completed' ? <FaCheckCircle /> : <FaExclamationTriangle />}
+                      {log.status === 'completed' || log.status === 'resolved' ? <FaCheckCircle /> : <FaExclamationTriangle />}
                       {log.status}
                     </div>
+                    
+                    {/* Action Buttons */}
+                    {isRequest && (['serviceprovider', 'admin'].includes(role)) && (
+                        <button 
+                            disabled={isStarting}
+                            onClick={() => {
+                                startService({
+                                    requestId: log.logId,
+                                    submissionId: log.submissionId,
+                                    serviceType: log.serviceType,
+                                    providerName: 'Marine Services Corp',
+                                    quantityUnit: 'hours'
+                                });
+                            }}
+                            className="text-[10px] font-bold bg-amber-500 text-white px-4 py-1.5 rounded hover:bg-amber-600 uppercase tracking-widest flex items-center gap-1"
+                        >
+                            <FaPlay /> Accept & Start
+                        </button>
+                    )}
+
+                    {isRequest && (['shippingagent', 'portauthority', 'admin'].includes(role)) && (
+                        <button 
+                            onClick={() => {
+                                const reason = window.prompt("Enter reason for cancellation:");
+                                if (reason) cancelService({ logId: log.logId, reason });
+                            }}
+                            className="text-[10px] font-bold text-rose-600 hover:underline uppercase tracking-widest flex items-center gap-1"
+                        >
+                            <FaTimes /> Cancel Request
+                        </button>
+                    )}
+
                     {log.status === 'started' && (['serviceprovider', 'admin', 'portauthority'].includes(role)) && (
                       <button 
                         disabled={isCompleting}
@@ -170,6 +212,30 @@ export default function PortServicesPage() {
                         className="text-[10px] font-bold text-portaccent hover:underline uppercase tracking-widest flex items-center gap-1"
                       >
                         <FaCheck /> Mark Complete
+                      </button>
+                    )}
+
+                    {(log.status === 'started' || log.status === 'completed') && (['portauthority', 'admin'].includes(role)) && (
+                      <button 
+                        onClick={() => {
+                          const reason = window.prompt("Enter reason for dispute:");
+                          if (reason) dispute({ action: 'raise', logId: log.logId, reason });
+                        }}
+                        className="text-[10px] font-bold text-rose-600 hover:underline uppercase tracking-widest flex items-center gap-1"
+                      >
+                        <FaExclamationTriangle /> Raise Dispute
+                      </button>
+                    )}
+
+                    {log.status === 'disputed' && (['portauthority', 'admin'].includes(role)) && (
+                      <button 
+                        onClick={() => {
+                          const res = window.prompt("Enter resolution details:");
+                          if (res) dispute({ action: 'resolve', logId: log.logId, resolution: res });
+                        }}
+                        className="text-[10px] font-bold text-teal-600 hover:underline uppercase tracking-widest flex items-center gap-1"
+                      >
+                        <FaCheckCircle /> Resolve Dispute
                       </button>
                     )}
                   </div>
@@ -182,7 +248,7 @@ export default function PortServicesPage() {
         <div className="port-card p-20 text-center flex flex-col items-center gap-4 bg-white/40">
           <FaAnchor className="text-5xl text-portmid" />
           <h3 className="text-2xl font-display text-color-text-secondary">No Ledger Operations</h3>
-          <p className="text-sm text-color-text-muted max-w-md">No port services have been logged on this channel yet.</p>
+          <p className="text-sm text-color-text-muted max-w-md">No port services have been requested or logged on this channel yet.</p>
         </div>
       )}
     </div>

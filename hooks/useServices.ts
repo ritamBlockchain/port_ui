@@ -16,7 +16,16 @@ export function useServices() {
   });
 
   const startServiceMutation = useMutation({
-    mutationFn: async (data: { submissionId: string; serviceType: string; providerName: string; providerId: string }) => {
+    mutationFn: async (data: { 
+      submissionId: string; 
+      serviceType: string; 
+      providerName: string; 
+      providerId?: string;
+      requestId?: string;
+      logId?: string;
+      assignmentId?: string;
+      quantityUnit?: string;
+    }) => {
       const res = await fetch('/api/fabric/services/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,6 +64,26 @@ export function useServices() {
     },
   });
 
+  const disputeMutation = useMutation({
+    mutationFn: async (data: { action: 'raise' | 'resolve'; logId: string; reason?: string; resolution?: string }) => {
+      const res = await fetch('/api/fabric/services/dispute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error);
+      return json;
+    },
+    onSuccess: (_, variables) => {
+      toast.success(`Service dispute ${variables.action === 'raise' ? 'raised' : 'resolved'} successfully`);
+      queryClient.invalidateQueries({ queryKey: ['port-services-list'] });
+    },
+    onError: (err: any) => {
+      toast.error(`Operation failed: ${err.message}`);
+    },
+  });
+
   return {
     logs,
     isLoading,
@@ -64,5 +93,26 @@ export function useServices() {
     isStarting: startServiceMutation.isPending,
     completeService: completeServiceMutation.mutate,
     isCompleting: completeServiceMutation.isPending,
+    dispute: disputeMutation.mutate,
+    isDisputing: disputeMutation.isPending,
+    cancelService: useMutation({
+      mutationFn: async (data: { logId: string; reason: string }) => {
+        const res = await fetch('/api/fabric/services/cancel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error);
+        return json;
+      },
+      onSuccess: () => {
+        toast.success('Service request cancelled successfully');
+        queryClient.invalidateQueries({ queryKey: ['port-services-list'] });
+      },
+      onError: (err: any) => {
+        toast.error(`Cancellation failed: ${err.message}`);
+      },
+    }).mutate
   };
 }

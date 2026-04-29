@@ -3,38 +3,64 @@ import { evaluateTransaction } from '@/lib/fabric/connection';
 
 export async function GET() {
   try {
-    // Prefix scan for all service logs (svclog:*)
-    const query = 'prefix:svclog:';
-
-    console.log('Fetching live service logs using Prefix Query...');
-    const result = await evaluateTransaction('QueryAssets', query);
-    const resultString = result.toString();
-
-    if (!resultString || resultString.trim() === '') {
-      return NextResponse.json({ success: true, data: [] });
-    }
+    // Fetch both service logs and service requests
+    console.log('Fetching live service data (logs & requests)...');
     
-    const rawData = JSON.parse(resultString);
-    const data = rawData.map((item: string) => {
+    const logsResult = await evaluateTransaction('QueryAssets', 'prefix:svclog:');
+    const requestsResult = await evaluateTransaction('QueryAssets', 'prefix:svcreq:');
+
+    const logsString = logsResult.toString();
+    const reqsString = requestsResult.toString();
+
+    let allData: any[] = [];
+
+    if (logsString && logsString.trim() !== '' && logsString !== '[]') {
+      const logs = JSON.parse(logsString).map((item: string) => {
         const obj = JSON.parse(item);
         return {
-            ...obj,
-            // Map ledger's Quantity/quantity to frontend's durationMins
-            durationMins: obj.quantity || obj.Quantity || 0,
-            logId: obj.logId || obj.LogId,
-            status: obj.status || obj.Status,
-            submissionId: obj.submissionId || obj.SubmissionId,
-            serviceType: obj.serviceType || obj.ServiceType,
-            vesselIMO: obj.vesselIMO || obj.VesselIMO
+          ...obj,
+          type: 'log',
+          durationMins: obj.quantity || obj.Quantity || 0,
         };
+      });
+      allData = [...allData, ...logs];
+    }
+
+    if (reqsString && reqsString.trim() !== '' && reqsString !== '[]') {
+      const reqs = JSON.parse(reqsString).map((item: string) => {
+        const obj = JSON.parse(item);
+        
+        // Check if this request has already been converted to a log
+        const hasLog = allData.some(log => log.type === 'log' && log.requestId === obj.requestId);
+
+        if (obj.status === 'open' && !hasLog) {
+            return {
+                ...obj,
+                type: 'request',
+                logId: obj.requestId, // Map requestId to logId for UI consistency
+                providerName: 'PENDING',
+                durationMins: 0,
+            };
+        }
+        return null;
+      }).filter(Boolean);
+      allData = [...allData, ...reqs];
+    }
+
+    // Sort by timestamp (most recent first)
+    allData.sort((a, b) => {
+        const timeA = new Date(a.loggedAt || a.requestedAt).getTime();
+        const timeB = new Date(b.loggedAt || b.requestedAt).getTime();
+        return timeB - timeA;
     });
 
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({ success: true, data: allData });
   } catch (error: any) {
-    console.error('Fabric Service Logs Fetch Failed:', error.message);
+    console.error('Fabric Service Data Fetch Failed:', error.message);
     return NextResponse.json({ 
       success: false, 
-      error: error.message || 'Failed to fetch live service logs'
+      error: error.message || 'Failed to fetch live service data'
     }, { status: 500 });
   }
 }
+

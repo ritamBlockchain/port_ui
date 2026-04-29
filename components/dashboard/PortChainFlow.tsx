@@ -119,29 +119,47 @@ export default function PortChainFlow() {
   // Calculate phase status
   const getPhaseStatus = (phaseId: number) => {
     switch (phaseId) {
-      case 1:
-        const pending = submissions?.filter((s: any) => s.status === 'pending').length || 0;
-        const compliant = submissions?.filter((s: any) => s.status === 'compliant').length || 0;
-        return { active: pending + compliant, completed: compliant };
-      case 2:
-        const approved = submissions?.filter((s: any) => s.status === 'approved').length || 0;
-        return { active: approved, completed: approved };
-      case 3:
-        const withBerth = submissions?.filter((s: any) => s.berthId).length || 0;
-        return { active: withBerth, completed: withBerth };
-      case 4:
+      case 1: {
+        // Active: Just submitted, awaiting automated compliance
+        const active = submissions?.filter((s: any) => ['pending', 'submitted'].includes(s.status?.toLowerCase())).length || 0;
+        // Completed: Passed compliance or further along the flow
+        const completed = submissions?.filter((s: any) => !['pending', 'submitted'].includes(s.status?.toLowerCase())).length || 0;
+        return { active, completed };
+      }
+      case 2: {
+        // Active: Compliant but not yet fully approved
+        const active = submissions?.filter((s: any) => s.status?.toLowerCase() === 'compliant').length || 0;
+        // Completed: Fully approved or further
+        const completed = submissions?.filter((s: any) => s.status?.toLowerCase() === 'approved').length || 0;
+        return { active, completed };
+      }
+      case 3: {
+        // Active: Approved but no berth assigned yet
+        const active = submissions?.filter((s: any) => s.status?.toLowerCase() === 'approved' && !s.berthId).length || 0;
+        // Completed: Berth assigned
+        const completed = submissions?.filter((s: any) => s.berthId).length || 0;
+        return { active, completed };
+      }
+      case 4: {
+        // Active: Services started but not finished
         const started = serviceLogs?.filter((l: any) => l.status === 'started').length || 0;
-        const completed = serviceLogs?.filter((l: any) => l.status === 'completed').length || 0;
-        return { active: started + completed, completed };
-      case 5:
+        // Completed: Services finished
+        const completed = serviceLogs?.filter((l: any) => l.status === 'completed' || l.status === 'resolved').length || 0;
+        return { active: started, completed };
+      }
+      case 5: {
+        // Active: Invoices issued but not paid
         const issued = invoices?.filter((i: any) => i.status === 'issued').length || 0;
+        // Completed: Invoices paid
         const paid = invoices?.filter((i: any) => i.status === 'paid').length || 0;
-        return { active: issued + paid, completed: paid };
-      case 6:
-        const issuedEBL = ebls?.filter((e: any) => e.status === 'issued').length || 0;
-        return { active: issuedEBL, completed: issuedEBL };
-      case 7:
-        return { active: 0, completed: 0 }; // Credentials data not fetched
+        return { active: issued, completed: paid };
+      }
+      case 6: {
+        // EBL status tracking
+        const active = ebls?.filter((e: any) => e.status === 'draft').length || 0;
+        const completed = ebls?.filter((e: any) => e.status === 'issued').length || 0;
+        return { active, completed };
+      }
       default:
         return { active: 0, completed: 0 };
     }

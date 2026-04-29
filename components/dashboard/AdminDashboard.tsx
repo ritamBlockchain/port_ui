@@ -159,7 +159,7 @@ export default function AdminDashboard() {
               <div className="bg-portbase rounded-xl p-4 border border-portmid">
                  <p className="text-[10px] font-bold uppercase tracking-widest text-color-text-muted mb-2">Last Anchored Leaf Hash</p>
                  <p className="text-[10px] font-mono break-all opacity-80">
-                   {allLeaves?.length > 0 ? allLeaves[allLeaves.length - 1]?.contentHash?.substring(0, 16) + '...' : 'No leaves recorded'}
+                   {allLeaves?.length > 0 ? allLeaves[0]?.contentHash?.substring(0, 16) + '...' : 'No leaves recorded'}
                  </p>
                </div>
 

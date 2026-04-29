@@ -11,13 +11,18 @@ export async function POST(req: NextRequest) {
 
     const currentTime = new Date().toISOString();
 
-    console.log(`[Fabric] Verifying Credential ${credentialId}`);
+    let cleanId = credentialId.toString();
+    if (cleanId.startsWith('did:portchain:')) {
+      cleanId = cleanId.replace('did:portchain:', '');
+    }
+
+    console.log(`[Fabric] Verifying Credential ${cleanId}`);
     
     // Contract: VerifyCredential(ctx, credentialId, certificateHashToCheck, currentTimeISO)
     // Note: VerifyCredential is a state-writing transaction in this contract because it logs the verification
     const result = await submitTransaction(
         'VerifyCredential', 
-        credentialId.toString(), 
+        cleanId, 
         certificateHash.toString(), 
         currentTime.toString()
     );

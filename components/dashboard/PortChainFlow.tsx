@@ -360,7 +360,7 @@ export default function PortChainFlow() {
                 </div>
                 <div className="h-px w-12 bg-slate-200" />
                 <span className="text-[10px] font-black tracking-[0.3em] text-sky-600 uppercase">
-                  Network Active / v2.4.0
+                  Network Active / LATEST
                 </span>
               </div>
               <h1 className="text-4xl md:text-5xl font-black tracking-tight text-slate-900 font-roboto mb-4">

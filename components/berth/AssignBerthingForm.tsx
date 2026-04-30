@@ -56,10 +56,10 @@ export default function AssignBerthingForm({ submissionId, vesselName, vesselIMO
   };
 
   return (
-    <div className="port-card p-6 bg-white border-2 border-indigo-500 shadow-2xl animate-in zoom-in duration-300">
-      <div className="flex items-center gap-3 mb-6 border-b border-portmid pb-4">
-        <div className="p-3 bg-indigo-100 text-indigo-700 rounded-xl">
-          <FaBuilding className="text-xl" />
+    <div className="port-card p-10 bg-white border-none shadow-[0_32px_64px_-16px_rgba(4,23,47,0.15)] animate-in zoom-in duration-500 rounded-[2.5rem]">
+      <div className="flex items-center gap-4 mb-10 border-b border-slate-50 pb-8">
+        <div className="w-14 h-14 bg-sky-50 text-[#04172F] rounded-2xl flex items-center justify-center border border-sky-100 shadow-inner">
+          <FaBuilding className="text-2xl" />
         </div>
         <div>
           <h3 className="text-xl font-display text-color-text-primary">Assign Berth Portfolio</h3>
@@ -114,24 +114,27 @@ export default function AssignBerthingForm({ submissionId, vesselName, vesselIMO
           </div>
         </div>
 
-        <div className="flex items-center gap-3 p-4 bg-indigo-50 border border-indigo-100 rounded-xl">
+        <div className="flex items-center gap-4 p-5 bg-slate-50 border border-slate-100 rounded-2xl transition-all hover:bg-slate-100/50 group/check">
            <input 
             type="checkbox" 
             id="override" 
             checked={formData.isOverride} 
             onChange={(e) => setFormData({...formData, isOverride: e.target.checked})}
-            className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+            className="w-5 h-5 text-[#04172F] rounded-lg border-slate-300 focus:ring-sky-500 transition-all cursor-pointer"
            />
-           <label htmlFor="override" className="text-xs font-medium text-indigo-700">Override existing schedules and force priority allocation</label>
+           <label htmlFor="override" className="text-xs font-bold text-slate-500 uppercase tracking-widest cursor-pointer group-hover/check:text-[#04172F] transition-colors">Force Priority Allocation (Override Schedules)</label>
         </div>
 
         <button 
           disabled={assignBerthMutation.isPending}
           type="submit" 
-          className="w-full port-btn-primary bg-indigo-600 hover:bg-indigo-700 py-4 flex items-center justify-center gap-2 shadow-lg shadow-indigo-200"
+          className="group w-full relative min-h-[4.5rem] py-4 bg-[#04172F] text-white rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.25em] overflow-hidden hover:bg-[#0a2a54] transition-all disabled:opacity-20 shadow-2xl shadow-black/20"
         >
-          {assignBerthMutation.isPending ? <FaAnchor className="animate-spin" /> : <FaCheckCircle />}
-          {assignBerthMutation.isPending ? 'Broadcasting to Registry...' : 'Authorize Berth Assignment'}
+          <div className="relative z-10 flex flex-row items-center justify-center gap-4">
+            {assignBerthMutation.isPending ? <FaAnchor className="animate-spin text-lg" /> : <FaCheckCircle className="text-sky-400 text-lg group-hover:scale-110 transition-transform" />}
+            <span>{assignBerthMutation.isPending ? 'Broadcasting to Registry...' : 'Authorize Berth Assignment'}</span>
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-sky-400 to-blue-600 opacity-0 group-hover:opacity-10 transition-opacity duration-500" />
         </button>
       </form>
     </div>

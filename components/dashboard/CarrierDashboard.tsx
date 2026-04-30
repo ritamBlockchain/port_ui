@@ -35,24 +35,38 @@ export default function CarrierDashboard() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Stakeholder Journey Banner */}
-      <div className="port-card p-6 bg-gradient-to-r from-[#1a2f45] to-[#2a4a6f] text-white rounded-2xl shadow-xl border border-white/10">
-        <div className="flex items-center justify-between mb-4">
+      <div className="port-card p-6 sm:p-10 bg-gradient-to-r from-[#04172F] to-[#0a2a54] text-white rounded-[2.5rem] shadow-2xl border border-white/5 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-sky-400/10 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
+        
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-10 gap-4">
           <div>
-            <h3 className="text-xl font-display font-bold mb-1">Carrier EBL Journey</h3>
-            <p className="text-sm opacity-80">Secure, immutable management of electronic Bill of Lading titles on the distributed ledger.</p>
+            <h3 className="text-2xl sm:text-3xl font-display font-black mb-2 tracking-tight">Carrier EBL Journey</h3>
+            <p className="text-sm opacity-60 max-w-xl">Secure, immutable management of electronic Bill of Lading titles on the distributed ledger.</p>
           </div>
         </div>
-        <div className="flex items-center justify-between gap-2">
+
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6 md:gap-2">
           {journeySteps.map((step, idx) => {
             const StepIcon = step.icon;
             return (
-              <div key={step.id} className="flex-1 flex flex-col items-center text-center">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${step.status === 'active' ? 'bg-portaccent text-white' : 'bg-white/10 text-white/60'}`}>
-                  <StepIcon className="text-lg" />
+              <div key={step.id} className="flex-1 flex flex-row md:flex-col items-center gap-4 md:gap-0 md:text-center group relative">
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[1.25rem] flex items-center justify-center shrink-0 transition-all ${
+                  step.status === 'active' 
+                    ? 'bg-sky-400 text-[#04172F] shadow-lg shadow-sky-400/20 scale-110 md:mb-4' 
+                    : 'bg-white/10 text-white/40 md:mb-4'
+                }`}>
+                  <StepIcon className="text-xl sm:text-2xl" />
                 </div>
-                <p className="text-xs font-bold uppercase tracking-wider">{step.title}</p>
-                <p className="text-[10px] opacity-60 mt-1">{step.description}</p>
-                {idx < journeySteps.length - 1 && <FaArrowRight className="text-white/20 text-xs mt-2" />}
+                <div className="flex-1 md:flex-none">
+                  <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${step.status === 'active' ? 'text-sky-400' : 'text-white/80'}`}>{step.title}</p>
+                  <p className="text-[9px] opacity-40 mt-1 leading-tight max-w-[100px] mx-auto hidden sm:block">{step.description}</p>
+                </div>
+                {idx < journeySteps.length - 1 && (
+                  <>
+                    <FaArrowRight className="hidden md:block text-white/20 text-xs mt-2 absolute transform translate-x-20" />
+                    <div className="md:hidden w-px h-6 bg-gradient-to-b from-white/20 to-transparent mx-auto my-1 absolute left-7 transform translate-y-12" />
+                  </>
+                )}
               </div>
             );
           })}

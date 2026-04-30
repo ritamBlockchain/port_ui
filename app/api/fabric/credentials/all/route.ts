@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { evaluateTransaction } from '@/lib/fabric/connection';
-import { MOCK_CREDENTIALS } from '@/lib/fabric/mock-data';
-
 export async function GET() {
   try {
     const query = 'prefix:cred:';
@@ -14,11 +12,11 @@ export async function GET() {
 
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
-    console.error('Fabric Credentials Fetch Failed. Returning Mock Data:', error.message);
+    console.error('Fabric Credentials Fetch Failed:', error.message);
     return NextResponse.json({ 
-      success: true, 
-      data: MOCK_CREDENTIALS,
-      isMock: true
+      success: false, 
+      data: [],
+      error: error.message
     });
   }
 }

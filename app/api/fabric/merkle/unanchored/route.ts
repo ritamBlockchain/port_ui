@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
 import { evaluateTransaction } from '@/lib/fabric/connection';
-import { MOCK_UNANCHORED } from '@/lib/fabric/mock-data';
-
 export async function GET() {
   try {
     // Try the rich query first (CouchDB)
@@ -37,11 +35,11 @@ export async function GET() {
       throw queryError;
     }
   } catch (error: any) {
-    console.error('Fabric Merkle connection failed. Returning Mock Data:', error.message);
+    console.error('Fabric Merkle connection failed:', error.message);
     return NextResponse.json({ 
-      success: true, 
-      data: MOCK_UNANCHORED,
-      isMock: true
+      success: false, 
+      data: [],
+      error: error.message
     });
   }
 }

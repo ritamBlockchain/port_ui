@@ -35,11 +35,14 @@ export default function BerthManagementPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Vessel List */}
         <div className="lg:col-span-1 space-y-4">
-          <div className="bg-indigo-900 text-white p-4 rounded-t-2xl flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-              <FaShip /> Approved Pending Berth
+          <div className="bg-gradient-to-r from-[#04172F] to-[#0a2a54] text-white p-6 rounded-t-[1.5rem] flex items-center justify-between shadow-lg">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center border border-white/10">
+                <FaShip className="text-sky-400" />
+              </div>
+              Approved Pending Berth
             </h3>
-            <span className="bg-white/20 px-2 py-0.5 rounded text-[10px] font-bold">{approvedSubmissions.length}</span>
+            <span className="bg-sky-500/20 text-sky-400 px-3 py-1 rounded-full text-[10px] font-black border border-sky-500/30">{approvedSubmissions.length}</span>
           </div>
           
           <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
@@ -48,18 +51,21 @@ export default function BerthManagementPage() {
                 <button
                   key={s.submissionId}
                   onClick={() => setSelectedSubmissionId(s.submissionId)}
-                  className={`w-full port-card p-4 text-left transition-all border-l-4 group ${
+                  className={`w-full port-card p-5 text-left transition-all border-l-4 group relative overflow-hidden ${
                     selectedSubmissionId === s.submissionId 
-                      ? 'border-l-indigo-500 bg-indigo-50/50 ring-1 ring-indigo-200' 
-                      : 'border-l-transparent hover:border-l-portaccent'
+                      ? 'border-l-sky-500 bg-sky-50/30 ring-1 ring-sky-200/50' 
+                      : 'border-l-transparent hover:border-l-portaccent/40'
                   }`}
                 >
+                  {selectedSubmissionId === s.submissionId && (
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-sky-500/5 rounded-full -mr-12 -mt-12 blur-2xl" />
+                  )}
                   <div className="flex justify-between items-start">
                     <div>
                       <h4 className="font-display text-lg text-color-text-primary">{s.vesselName}</h4>
                       <p className="text-[10px] font-mono text-color-text-muted">{s.vesselIMO}</p>
                     </div>
-                    {selectedSubmissionId === s.submissionId && <FaCheckCircle className="text-indigo-500 text-sm" />}
+                    {selectedSubmissionId === s.submissionId && <FaCheckCircle className="text-sky-500 text-base" />}
                   </div>
                   <div className="mt-3 flex items-center gap-2 text-[10px] text-color-text-secondary font-bold uppercase tracking-tighter">
                     <FaUserClock /> ETA: {new Date(s.etaTimestamp).toLocaleDateString()}
@@ -89,9 +95,9 @@ export default function BerthManagementPage() {
             </div>
           ) : (
             <div className="h-full min-h-[400px] port-card border-dashed flex flex-col items-center justify-center text-center p-10 bg-white/60">
-               <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-300 mb-4 ring-8 ring-indigo-50/50">
+                <div className="w-20 h-20 bg-sky-50 rounded-3xl flex items-center justify-center text-sky-300 mb-6 ring-8 ring-sky-50/50 transform rotate-3">
                   <FaBuilding className="text-4xl" />
-               </div>
+                </div>
                <h3 className="text-xl font-display text-color-text-secondary mb-2">Select a vessel to allocate space</h3>
                <p className="text-sm text-color-text-muted max-w-sm">Berth allocation is a mandatory step before port services like pilotage or mooring can be started on the ledger.</p>
             </div>

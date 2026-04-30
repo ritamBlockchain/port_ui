@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
 import { evaluateTransaction } from '@/lib/fabric/connection';
-import { MOCK_INVOICES } from '@/lib/fabric/mock-data';
-
 export async function GET() {
   try {
     // Try a multi-strategy approach to find invoices
@@ -36,7 +34,6 @@ export async function GET() {
         if (obj.logId || obj.LogId || obj.bankRefNumber || obj.BankRefNumber) return null;
 
         // Force extraction of all key fields regardless of casing
-        // We put ...obj FIRST so that our explicit mappings below OVERWRITE any messy ledger casing
         const mapped = {
           ...obj,
           invoiceId: obj.invoiceId || obj.InvoiceId || obj.ID || obj.id || "N/A",
@@ -62,11 +59,11 @@ export async function GET() {
     console.log(`[DEBUG] Returning ${data.length} valid invoices to frontend.`);
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
-    console.error('Invoice Query Error. Returning Mock Data:', error.message);
+    console.error('Invoice Query Error:', error.message);
     return NextResponse.json({ 
-      success: true, 
-      data: MOCK_INVOICES,
-      isMock: true
+      success: false, 
+      data: [],
+      error: error.message
     }); 
   }
 }

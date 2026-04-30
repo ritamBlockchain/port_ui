@@ -64,17 +64,28 @@ export default function RegulatoryDashboard() {
             <p className="text-sm opacity-80">Accelerated cross-agency validation through automated compliance on the blockchain.</p>
           </div>
         </div>
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-6 sm:gap-2">
           {journeySteps.map((step, idx) => {
             const StepIcon = step.icon;
             return (
-              <div key={step.id} className="flex-1 flex flex-col items-center text-center">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2 ${step.status === 'active' ? 'bg-portaccent text-white' : 'bg-white/10 text-white/60'}`}>
-                  <StepIcon className="text-lg" />
+              <div key={step.id} className="flex-1 flex flex-row sm:flex-col items-center gap-4 sm:gap-0 sm:text-center group">
+                <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-[1.25rem] flex items-center justify-center shrink-0 transition-all ${
+                  step.status === 'active' 
+                    ? 'bg-sky-400 text-[#04172F] shadow-lg shadow-sky-400/20 scale-110 sm:mb-4' 
+                    : 'bg-white/10 text-white/40 sm:mb-4'
+                }`}>
+                  <StepIcon className="text-xl sm:text-2xl" />
                 </div>
-                <p className="text-xs font-bold uppercase tracking-wider">{step.title}</p>
-                <p className="text-[10px] opacity-60 mt-1">{step.description}</p>
-                {idx < journeySteps.length - 1 && <FaArrowRight className="text-white/20 text-xs mt-2" />}
+                <div className="flex-1 sm:flex-none">
+                  <p className={`text-[11px] font-black uppercase tracking-[0.15em] ${step.status === 'active' ? 'text-sky-400' : 'text-white/80'}`}>{step.title}</p>
+                  <p className="text-[10px] opacity-50 mt-1 leading-tight max-w-[120px] mx-auto">{step.description}</p>
+                </div>
+                {idx < journeySteps.length - 1 && (
+                  <>
+                    <FaArrowRight className="hidden sm:block text-white/20 text-xs mt-2 absolute transform translate-x-24" />
+                    <div className="sm:hidden w-px h-6 bg-gradient-to-b from-white/20 to-transparent mx-auto my-1 absolute left-7 transform translate-y-12" />
+                  </>
+                )}
               </div>
             );
           })}
@@ -127,20 +138,20 @@ export default function RegulatoryDashboard() {
                   </Link>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-portmid/10">
-                  <div className="text-center">
-                    <p className="text-[10px] uppercase font-bold tracking-widest text-color-text-muted">ETA</p>
-                    <p className="text-sm font-bold text-color-text-primary">{new Date(sub.etaTimestamp).toLocaleDateString()}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-6 gap-x-4 mt-6 pt-6 border-t border-slate-50">
+                  <div className="text-left sm:text-center">
+                    <p className="text-[9px] uppercase font-black tracking-widest text-slate-400 mb-1">ETA</p>
+                    <p className="text-xs font-bold text-[#04172F]">{new Date(sub.etaTimestamp).toLocaleDateString()}</p>
                   </div>
-                  <div className="text-center">
-                    <p className="text-[10px] uppercase font-bold tracking-widest text-color-text-muted">Purpose</p>
-                    <p className="text-sm font-bold text-color-text-primary">{sub.portCallPurpose}</p>
+                  <div className="text-left sm:text-center">
+                    <p className="text-[9px] uppercase font-black tracking-widest text-slate-400 mb-1">Purpose</p>
+                    <p className="text-xs font-bold text-[#04172F] truncate">{sub.portCallPurpose}</p>
                   </div>
-                  <div className="text-center">
-                    <p className="text-[10px] uppercase font-bold tracking-widest text-color-text-muted">Status</p>
-                    <span className={`px-2 py-1 rounded border text-xs font-bold uppercase ${
-                      sub.status === 'compliant' ? 'bg-indigo-50 text-indigo-600 border-indigo-200' : 
-                      'bg-amber-50 text-amber-600 border-amber-200'
+                  <div className="col-span-2 sm:col-span-1 text-left sm:text-center pt-4 sm:pt-0 border-t sm:border-t-0 border-slate-50 sm:border-transparent">
+                    <p className="text-[9px] uppercase font-black tracking-widest text-slate-400 mb-2">Status</p>
+                    <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                      sub.status === 'compliant' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 
+                      'bg-amber-50 text-amber-600 border border-amber-100'
                     }`}>{sub.status}</span>
                   </div>
                 </div>

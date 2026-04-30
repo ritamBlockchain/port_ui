@@ -108,26 +108,26 @@ export default function PortAuthorityDashboard() {
           </div>
 
           {/* Journey Steps Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {journeySteps.map((step, idx) => {
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 max-w-4xl mx-auto">
+            {journeySteps.map((step) => {
               const Icon = step.icon;
+              const descWords = step.description.split(' ');
               return (
                 <div key={step.id} className="group relative">
-                  <div className="flex flex-col items-center p-6 rounded-3xl bg-white border border-slate-100 shadow-sm transition-all duration-500 hover:shadow-xl hover:-translate-y-1 group-hover:border-indigo-100">
+                  <div className="flex flex-col items-center p-8 sm:p-10 rounded-[3rem] bg-white border border-slate-100 shadow-[0_15px_35px_-10px_rgba(0,0,0,0.05)] transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 group-hover:border-slate-200">
                     <div 
-                      className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3"
-                      style={{ background: `${step.color}10`, border: `1px solid ${step.color}20` }}
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-[2rem] flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110"
+                      style={{ background: `${step.color}08`, border: `1px solid ${step.color}15` }}
                     >
-                      <Icon className="text-2xl" style={{ color: step.color }} />
+                      <Icon className="text-2xl sm:text-3xl" style={{ color: step.color }} />
                     </div>
-                    <p className="text-xs font-black text-slate-900 uppercase tracking-widest text-center">{step.title}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mt-1 text-center">{step.description}</p>
+                    <p className="text-[11px] font-black text-[#04172F] uppercase tracking-[0.2em] text-center mb-3">{step.title}</p>
+                    <div className="flex flex-col items-center text-center">
+                       {descWords.map((word, i) => (
+                         <p key={i} className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">{word}</p>
+                       ))}
+                    </div>
                   </div>
-                  {idx < journeySteps.length - 1 && (
-                    <div className="hidden md:block absolute -right-3 top-1/2 -translate-y-1/2 z-20">
-                      <FaArrowRight className="text-slate-200 text-xs" />
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -213,22 +213,29 @@ export default function PortAuthorityDashboard() {
         {/* ── FINANCIAL CLEARANCE ── */}
         <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col transition-all hover:shadow-md">
            <div className="p-8 border-b border-slate-50 flex justify-between items-center">
-              <div>
+              <div className="flex items-center gap-4">
                 <h4 className="text-xl font-black tracking-tight text-slate-900 flex items-center gap-3">
                   <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600"><FaFileInvoice /></div>
-                  Settlement Board <span className="text-slate-300 font-light text-sm italic">Phase 05</span>
+                  Settlement Board
                 </h4>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-slate-300 font-black italic uppercase tracking-widest">Phase 05</span>
+                  <Link href="/invoices" className="text-[9px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 hover:bg-emerald-100 transition-colors">Full Board</Link>
+                </div>
               </div>
-              <Link href="/invoices" className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:underline">Full Board</Link>
            </div>
            
            <div className="p-8 space-y-8">
-              <div className="bg-emerald-50/30 border border-emerald-100/50 rounded-3xl p-8 text-center group">
-                 <p className="text-sm text-slate-500 mb-6 font-medium leading-relaxed">
+              <div className="bg-emerald-50/20 border border-emerald-100/30 rounded-[2rem] p-10 text-center group">
+                 <p className="text-sm text-slate-500 mb-8 font-medium leading-relaxed max-w-[240px] mx-auto">
                    Aggregated services can be converted into unified <span className="text-emerald-700 font-black">port invoices</span> once logs are verified.
                  </p>
-                 <Link href="/invoices" className="w-full py-4 rounded-2xl bg-emerald-600 text-white text-xs font-black uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-600/20 flex items-center justify-center gap-3">
-                    <FaFileInvoice /> Generate Service Invoices
+                 <Link href="/invoices" className="inline-flex flex-col items-center justify-center gap-2 px-10 py-6 rounded-3xl bg-emerald-600 text-white hover:bg-emerald-700 transition-all shadow-2xl shadow-emerald-600/30 group/btn active:scale-95">
+                    <div className="flex items-center gap-3">
+                       <FaFileInvoice className="text-sm" />
+                       <span className="text-[11px] font-black uppercase tracking-[0.2em] leading-none">Generate Service</span>
+                    </div>
+                    <span className="text-[11px] font-black uppercase tracking-[0.2em] leading-none">Invoices</span>
                  </Link>
               </div>
               

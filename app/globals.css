@@ -1,25 +1,31 @@
 @import "tailwindcss";
 
 @theme {
+  /* Brand Identity */
+  --color-brand-primary: #04172F;
+  --color-brand-secondary: #0a2a54;
+  --color-brand-accent: #38BDF8;
+  --color-brand-surface: #F8FAFC;
+
   --color-base: #FFFFFF;
   --color-surface: #FFFFFF;
   --color-mid: #E2E8F0;
-  --color-accent: #04172F;
+  --color-accent: var(--color-brand-primary);
 
   --color-background: #FFFFFF;
-  --color-foreground: #04172F;
+  --color-foreground: var(--color-brand-primary);
   
   --color-portbase: #FFFFFF;
   --color-portsurface: #FFFFFF;
   --color-portmid: #E2E8F0;
-  --color-portaccent: #04172F;
+  --color-portaccent: var(--color-brand-primary);
 
   --color-success: #10B981;
   --color-warning: #F59E0B;
   --color-danger: #EF4444;
   --color-info: #3B82F6;
 
-  --color-text-primary: #04172F;
+  --color-text-primary: var(--color-brand-primary);
   --color-text-secondary: #64748B;
   --color-text-muted: #94A3B8;
 
@@ -74,5 +80,17 @@
   }
   .animate-float {
     animation: float 4s ease-in-out infinite;
+  }
+
+  @keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .animate-gradient {
+    animation: gradient 8s linear infinite;
+  }
+  .bg-size-300 {
+    background-size: 300% 300%;
   }
 }

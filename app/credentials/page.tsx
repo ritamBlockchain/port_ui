@@ -17,20 +17,20 @@ export default function CredentialsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
         <div>
-          <h1 className="text-3xl font-display">Credential Registry</h1>
-          <p className="text-color-text-secondary">Verifiable digital identities and compliance certificates</p>
+          <h1 className="text-3xl sm:text-4xl font-display text-color-text-primary">Credential Registry</h1>
+          <p className="text-color-text-secondary text-sm sm:text-base">Verifiable digital identities and compliance certificates</p>
         </div>
-        <div className="flex gap-2">
-            <button onClick={() => refetch()} className="p-2 border border-portmid rounded-lg text-portaccent">
+        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            <button onClick={() => refetch()} className="p-3 border border-portmid rounded-xl text-portaccent hover:bg-portbase transition-all">
                 <FaSync className={isLoading ? 'animate-spin' : ''} />
             </button>
-            <Link href="/credentials/revocations" className="px-4 py-2 border border-rose-200 text-rose-600 rounded-lg font-bold text-xs uppercase tracking-widest flex items-center gap-2 hover:bg-rose-50 transition-all">
-                <FaExclamationTriangle /> Revocation List
+            <Link href="/credentials/revocations" className="flex-1 lg:flex-none px-4 py-3 border border-rose-200 text-rose-600 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-rose-50 transition-all">
+                <FaExclamationTriangle /> Revocations
             </Link>
-            <Link href="/credentials/issue" className="port-btn-primary flex items-center gap-2">
-            <FaPlus /> Issue New Credential
+            <Link href="/credentials/issue" className="flex-[2] lg:flex-none px-6 py-3 bg-[#04172F] text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-[#0a2a54] transition-all shadow-xl shadow-black/10">
+                <FaPlus /> Issue New
             </Link>
         </div>
       </div>
@@ -42,7 +42,7 @@ export default function CredentialsPage() {
         </div>
       ) : isError ? (
         <div className="port-card p-10 bg-rose-50 border-rose-200 text-center">
-            <FaExclamationTriangle className="text-4xl text-rose-500 mx-auto mb-4" />
+            <FaExclamationTriangle className="text-4xl text-rose-500 mx-auto mb-4" /> 
             <h3 className="text-xl font-display text-rose-700">Ledger Error</h3>
             <p className="text-sm text-rose-600">Failed to fetch the verifiable credential registry from Hyperledger Fabric.</p>
         </div>
@@ -109,19 +109,21 @@ export default function CredentialsPage() {
       )}
 
       {/* Verification Service Info */}
-      <div className="bg-[#1a2f45] text-white p-8 rounded-2xl shadow-xl flex flex-col md:flex-row items-center gap-8 border border-white/10">
-        <div className="w-24 h-24 rounded-full bg-white/10 flex items-center justify-center text-4xl text-white outline outline-8 outline-white/5">
+      <div className="bg-[#04172F] text-white p-8 sm:p-12 rounded-[2.5rem] shadow-2xl flex flex-col lg:flex-row items-center gap-10 border border-white/5 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-sky-500/10 rounded-full -mr-32 -mt-32 blur-3xl" />
+        
+        <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-[2rem] bg-white/5 backdrop-blur-xl flex items-center justify-center text-4xl sm:text-5xl text-sky-400 border border-white/10 shadow-inner relative z-10">
           <FaCheckCircle />
         </div>
-        <div className="flex-1 text-center md:text-left">
-          <h2 className="text-2xl font-display mb-2">Zero-Knowledge Verification</h2>
-          <p className="text-sm opacity-80 max-w-2xl leading-relaxed">
+        <div className="flex-1 text-center lg:text-left relative z-10">
+          <h2 className="text-2xl sm:text-3xl font-display mb-4">Zero-Knowledge Verification</h2>
+          <p className="text-sm sm:text-base opacity-60 max-w-2xl leading-relaxed">
             All PortChain credentials utilize the W3C Verifiable Credentials standard. Parties can verify the authenticity of a certificate without contacting the issuing authority, directly against the ledger state.
           </p>
         </div>
-        <div className="flex flex-col gap-2 w-full md:w-auto">
-          <button className="bg-white text-[#1a2f45] px-6 py-2 rounded-lg font-bold text-sm tracking-wide hover:bg-opacity-90 transition-all uppercase">Verify External VC</button>
-          <button className="bg-white/10 text-white border border-white/20 px-6 py-2 rounded-lg font-bold text-sm tracking-wide hover:bg-white/20 transition-all uppercase">Download Manifest</button>
+        <div className="flex flex-col sm:flex-row lg:flex-col gap-3 w-full lg:w-auto relative z-10">
+          <button className="flex-1 px-8 py-4 bg-sky-400 text-[#04172F] rounded-2xl font-black text-[10px] tracking-[0.2em] hover:bg-sky-300 transition-all uppercase shadow-lg shadow-sky-400/20">Verify External VC</button>
+          <button className="flex-1 px-8 py-4 bg-white/5 text-white border border-white/10 rounded-2xl font-black text-[10px] tracking-[0.2em] hover:bg-white/10 transition-all uppercase">Download Manifest</button>
         </div>
       </div>
     </div>

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { evaluateTransaction } from '@/lib/fabric/connection';
-import { MOCK_SUBMISSIONS } from '@/lib/fabric/mock-data';
-
 export async function GET() {
   try {
     const query = 'prefix:prearrival:';
@@ -13,14 +11,12 @@ export async function GET() {
 
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
-    console.error('FABRIC CONNECTION FAILED. FALLING BACK TO MOCK DATA:', error.message);
+    console.error('FABRIC CONNECTION FAILED:', error.message);
     
-    // Return mock data with success: true to keep the UI functional
     return NextResponse.json({ 
-      success: true, 
-      data: MOCK_SUBMISSIONS,
-      isMock: true,
-      error: 'Fabric connection offline. Displaying demo data.'
+      success: false, 
+      data: [],
+      error: error.message
     });
   }
 }

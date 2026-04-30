@@ -76,7 +76,7 @@ export default function AdminDashboard() {
               </div>
               <div className="flex flex-col">
                 <span className="text-[10px] font-black uppercase tracking-[0.3em] text-sky-400/60 leading-none mb-1">Administrative Node</span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">v{process.env.NEXT_PUBLIC_APP_VERSION || '4.2.0'} PROD</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">v{process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0'} PROD</span>
               </div>
             </div>
             <h3 className="text-4xl font-display font-bold mb-4 tracking-tight">Network <span className="text-sky-400 font-light italic">Governance</span></h3>
@@ -90,7 +90,7 @@ export default function AdminDashboard() {
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 group-hover/stat:text-sky-400 transition-colors">Gateway Status</p>
               <div className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full ${health?.gateway === 'Connected' ? 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)] animate-pulse' : 'bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.6)]'} transition-colors`} />
-                <p className="text-xl sm:text-2xl font-display font-bold truncate">{health?.gateway || 'Active'}</p>
+                <p className="text-xl sm:text-2xl font-display font-bold truncate">{health?.gateway || '...'}</p>
               </div>
             </div>
             <div className="bg-white/5 backdrop-blur-2xl p-4 sm:p-6 rounded-3xl border border-white/10 hover:bg-white/10 transition-all group/stat">
@@ -216,7 +216,7 @@ export default function AdminDashboard() {
                 <span className="opacity-0 group-hover/hash:opacity-100 transition-opacity">LEDGER v2</span>
               </p>
               <p className="text-[11px] font-mono break-all text-[#04172F] font-bold leading-relaxed opacity-60 group-hover:opacity-100 transition-opacity">
-                {allLeaves?.length > 0 ? allLeaves[0]?.contentHash || '0x7f8e3d...9a2b7c' : '0x0000...0000'}
+                {allLeaves?.length > 0 ? allLeaves[0]?.contentHash || '0x000...000' : '0x0000...0000'}
               </p>
             </div>
 

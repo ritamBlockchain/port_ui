@@ -10,6 +10,10 @@ export async function GET() {
     console.log('Fetching live data using high-compatibility Prefix Query...');
     const result = await evaluateTransaction('QueryAssets', query);
     
+    if (!result || result.length === 0) {
+      return NextResponse.json({ success: true, data: [] });
+    }
+    
     const rawData = JSON.parse(result.toString());
     const data = rawData.map((item: string) => JSON.parse(item));
 

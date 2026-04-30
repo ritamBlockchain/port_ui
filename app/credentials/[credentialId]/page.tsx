@@ -228,8 +228,8 @@ export default function CredentialDetailPage() {
                 <FaAward className="text-4xl" />
               </div>
               <div>
-                <h2 className="text-2xl font-display uppercase tracking-wider text-portaccent">{credential.credentialType}</h2>
-                <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-color-text-muted">Issued by {credential.issuingAuthority}</p>
+                <h2 className="text-2xl font-display uppercase tracking-wider text-portaccent">{credential.credentialType || "VERIFIABLE CREDENTIAL"}</h2>
+                <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-color-text-muted">Issued by {credential.issuingAuthority || "Port Authority"}</p>
               </div>
             </div>
             <div className="text-right">
@@ -250,7 +250,7 @@ export default function CredentialDetailPage() {
               <div>
                 <label className="text-[10px] font-black uppercase tracking-widest text-color-text-muted block mb-2">Credential DID</label>
                 <p className="text-xs font-mono break-all bg-portsurface p-2 rounded border border-portmid">
-                  {credential.credentialId}
+                  {credential.id || credential.credentialId}
                 </p>
               </div>
 
